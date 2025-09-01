@@ -26,7 +26,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="flex flex-1 flex-col justify-between gap-4">
             <CardDescription>
-              Upload a requirements document (PDF, Word, etc.) to automatically parse its content and generate comprehensive test cases.
+              Upload a requirements document (PDF, XML, or Markdown) to automatically parse its content and generate comprehensive test cases.
             </CardDescription>
             <Button asChild className="mt-auto w-full">
               <Link href="/requirements">

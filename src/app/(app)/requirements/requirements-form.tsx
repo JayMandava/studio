@@ -142,14 +142,14 @@ export function RequirementsForm() {
           <CardHeader>
             <CardTitle>Upload Requirements Document</CardTitle>
             <CardDescription>
-              Select a PDF, Word, XML, or Markdown file containing your software requirements.
+              Select a PDF, XML, or Markdown file containing your software requirements.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid w-full max-w-sm items-center gap-2">
               <Label htmlFor="requirements-file">Document</Label>
               <div className="flex gap-2">
-                <Input id="requirements-file" type="file" onChange={handleFileChange} accept=".pdf,.doc,.docx,.xml,.md,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/xml,text/markdown" />
+                <Input id="requirements-file" type="file" onChange={handleFileChange} accept=".pdf,.xml,.md,application/pdf,text/xml,text/markdown" />
               </div>
               {file && <p className="text-sm text-muted-foreground flex items-center gap-2 pt-2"><FileText className="h-4 w-4"/> {file.name}</p>}
             </div>
