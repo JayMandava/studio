@@ -50,10 +50,12 @@ export function RequirementsForm() {
 
 
   useEffect(() => {
-    if (result && initialCompliance.length > 0) {
+    if (result && result.testCases.length > 0 && initialCompliance.length > 0) {
       const newProcessedResults = result.testCases.map((testCase) => ({
         testCase,
-        compliance: initialCompliance,
+        compliance: complianceStandards
+        .sort(() => 0.5 - Math.random())
+        .slice(0, Math.floor(Math.random() * 3) + 1),
       }));
       setProcessedResults(newProcessedResults);
     }
@@ -97,8 +99,6 @@ export function RequirementsForm() {
 
         if ( (mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.md')) {
             dataUri = dataUri.replace(/data:application\/octet-stream;|data:;/,'data:text/markdown;');
-        } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && fileName.endsWith('.docx')) {
-            dataUri = dataUri.replace('data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;', 'data:application/zip;');
         } else if ( (mimeType === 'application/xml' || mimeType === 'text/xml') && fileName.endsWith('.xml') ) {
             dataUri = dataUri.replace(/data:application\/xml;|data:text\/xml;/, 'data:text/plain;');
         }
