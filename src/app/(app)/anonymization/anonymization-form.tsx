@@ -81,7 +81,7 @@ export function AnonymizationForm() {
       <AlertDialog open={showDomainAlert} onOpenChange={setShowDomainAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Out of Scope</AlertDialogTitle>
+            <AlertDialogTitle>Can't process</AlertDialogTitle>
             <AlertDialogDescription>
               This tool is designed to work exclusively with data from the healthcare sector.
               The provided content does not appear to be related to healthcare and cannot be processed.

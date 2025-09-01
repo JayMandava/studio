@@ -62,7 +62,7 @@ export function RequirementsForm() {
 
 
   useEffect(() => {
-    if (result && result.testCases && result.testCases.length > 0 && initialCompliance.length > 0) {
+    if (result && result.testCases && result.testCases.length > 0) {
       const newProcessedResults = result.testCases.map((testCase) => ({
         testCase,
         compliance: complianceStandards
@@ -71,7 +71,7 @@ export function RequirementsForm() {
       }));
       setProcessedResults(newProcessedResults);
     }
-  }, [result, initialCompliance]);
+  }, [result]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -159,7 +159,7 @@ export function RequirementsForm() {
       <AlertDialog open={showDomainAlert} onOpenChange={setShowDomainAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Out of Scope</AlertDialogTitle>
+            <AlertDialogTitle>Can't process</AlertDialogTitle>
             <AlertDialogDescription>
               This tool is designed to work exclusively with documents from the healthcare sector.
               The provided document does not appear to be related to healthcare and cannot be processed.
