@@ -37,14 +37,20 @@ export function RequirementsForm() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const initialCompliance = useMemo(() => {
-    return complianceStandards
-      .sort(() => 0.5 - Math.random())
-      .slice(0, Math.floor(Math.random() * 3) + 1);
-  }, []);
+  const [initialCompliance, setInitialCompliance] = useState<string[]>([]);
 
   useEffect(() => {
-    if (result) {
+    // This runs only on the client
+    setInitialCompliance(
+        complianceStandards
+        .sort(() => 0.5 - Math.random())
+        .slice(0, Math.floor(Math.random() * 3) + 1)
+    );
+  }, []);
+
+
+  useEffect(() => {
+    if (result && initialCompliance.length > 0) {
       const newProcessedResults = result.testCases.map((testCase) => ({
         testCase,
         compliance: initialCompliance,
@@ -91,7 +97,7 @@ export function RequirementsForm() {
 
         if ( (mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.md')) {
             dataUri = dataUri.replace(/data:application\/octet-stream;|data:;/,'data:text/markdown;');
-        } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && fileName.endsWith('.docx')) {
             dataUri = dataUri.replace('data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;', 'data:application/zip;');
         } else if ( (mimeType === 'application/xml' || mimeType === 'text/xml') && fileName.endsWith('.xml') ) {
             dataUri = dataUri.replace(/data:application\/xml;|data:text\/xml;/, 'data:text/plain;');
