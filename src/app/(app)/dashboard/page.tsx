@@ -61,7 +61,7 @@ export default function DashboardPage() {
             <Image 
                 src="https://picsum.photos/600/400" 
                 alt="Healthcare technology" 
-                layout="fill"
+                fill={true}
                 objectFit="cover"
                 data-ai-hint="healthcare technology"
             />
