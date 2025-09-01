@@ -20,7 +20,10 @@ const ParseRequirementsAndGenerateTestCasesInputSchema = z.object({
 export type ParseRequirementsAndGenerateTestCasesInput = z.infer<typeof ParseRequirementsAndGenerateTestCasesInputSchema>;
 
 const ParseRequirementsAndGenerateTestCasesOutputSchema = z.object({
-  testCases: z.array(z.string()).describe('A list of generated test cases.'),
+  isHealthcareDomain: z
+    .boolean()
+    .describe('Whether the provided document is related to the healthcare domain.'),
+  testCases: z.array(z.string()).optional().describe('A list of generated test cases.'),
 });
 export type ParseRequirementsAndGenerateTestCasesOutput = z.infer<typeof ParseRequirementsAndGenerateTestCasesOutputSchema>;
 
@@ -36,7 +39,11 @@ const prompt = ai.definePrompt({
   output: {schema: ParseRequirementsAndGenerateTestCasesOutputSchema},
   prompt: `You are an expert in healthcare software testing and regulatory compliance.
 
-You will receive a document containing software requirements. Your task is to parse these requirements and generate a comprehensive set of test cases covering functional, non-functional, and edge cases. Ensure that the test cases are detailed and cover a wide range of scenarios.
+First, analyze the provided document to determine if it belongs to the healthcare domain.
+If it is not, set 'isHealthcareDomain' to false and do not generate any test cases.
+If the document is related to the healthcare domain, set 'isHealthcareDomain' to true and then proceed with the following:
+
+Your task is to parse these requirements and generate a comprehensive set of test cases covering functional, non-functional, and edge cases. Ensure that the test cases are detailed and cover a wide range of scenarios.
 
 The document can be in PDF, XML, or Markdown format.
 
