@@ -41,11 +41,13 @@ export function RequirementsForm() {
 
   useEffect(() => {
     // This runs only on the client
-    setInitialCompliance(
-        complianceStandards
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 3) + 1)
-    );
+    if (typeof window !== 'undefined') {
+        setInitialCompliance(
+            complianceStandards
+            .sort(() => 0.5 - Math.random())
+            .slice(0, Math.floor(Math.random() * 3) + 1)
+        );
+    }
   }, []);
 
 
@@ -142,7 +144,7 @@ export function RequirementsForm() {
           <CardHeader>
             <CardTitle>Upload Requirements Document</CardTitle>
             <CardDescription>
-              Select a PDF, XML, or Markdown file containing your software requirements.
+              Select a PDF, XML and Markdown file containing your software requirements.
             </CardDescription>
           </CardHeader>
           <CardContent>
