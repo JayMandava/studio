@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Loader2, ListChecks, Download, CheckCircle, AlertTriangle, FileText } from "lucide-react";
+import { Upload, Loader2, ListChecks, Download, CheckCircle, AlertTriangle, FileText, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -46,20 +46,7 @@ export function RequirementsForm() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [showDomainAlert, setShowDomainAlert] = useState(false);
-
-  const [initialCompliance, setInitialCompliance] = useState<string[]>([]);
-
-  useEffect(() => {
-    // This runs only on the client
-    if (typeof window !== 'undefined') {
-        setInitialCompliance(
-            complianceStandards
-            .sort(() => 0.5 - Math.random())
-            .slice(0, Math.floor(Math.random() * 3) + 1)
-        );
-    }
-  }, []);
-
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (result && result.testCases && result.testCases.length > 0) {
@@ -82,6 +69,16 @@ export function RequirementsForm() {
       setProcessedResults([]);
     }
   };
+  
+  const handleRemoveFile = () => {
+    setFile(null);
+    setResult(null);
+    setError(null);
+    setProcessedResults([]);
+    if(fileInputRef.current) {
+        fileInputRef.current.value = "";
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,8 +108,8 @@ export function RequirementsForm() {
 
         if ( (mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.md')) {
             dataUri = dataUri.replace(/data:application\/octet-stream;|data:;/,'data:text/markdown;');
-        } else if ( (mimeType === 'application/xml' || mimeType === 'text/xml') && fileName.endsWith('.xml') ) {
-            dataUri = dataUri.replace(/data:application\/xml;|data:text\/xml;/, 'data:text/plain;');
+        } else if ( (mimeType === 'application/xml' || mimeType === 'text/xml' || ((mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.xml'))) ) {
+            dataUri = dataUri.replace(/data:application\/xml;|data:text\/xml;|data:application\/octet-stream;|data:;/, 'data:text/plain;');
         }
 
         const response = await parseRequirementsAndGenerateTestCases({
@@ -184,9 +181,20 @@ export function RequirementsForm() {
               <div className="grid w-full max-w-sm items-center gap-2">
                 <Label htmlFor="requirements-file">Document</Label>
                 <div className="flex gap-2">
-                  <Input id="requirements-file" type="file" onChange={handleFileChange} accept=".pdf,.xml,.md,application/pdf,text/xml,text/markdown" />
+                  <Input id="requirements-file" ref={fileInputRef} type="file" onChange={handleFileChange} accept=".pdf,.xml,.md,application/pdf,text/xml,text/markdown" />
                 </div>
-                {file && <p className="text-sm text-muted-foreground flex items-center gap-2 pt-2"><FileText className="h-4 w-4"/> {file.name}</p>}
+                {file && (
+                    <div className="flex items-center justify-between rounded-md border border-input bg-background p-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                            <FileText className="h-4 w-4 flex-shrink-0"/>
+                            <span className="truncate">{file.name}</span>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={handleRemoveFile}>
+                           <X className="h-4 w-4"/>
+                           <span className="sr-only">Remove file</span>
+                        </Button>
+                    </div>
+                )}
               </div>
             </CardContent>
             <CardFooter>
