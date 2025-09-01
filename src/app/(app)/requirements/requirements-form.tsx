@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   parseRequirementsAndGenerateTestCases,
   type ParseRequirementsAndGenerateTestCasesOutput,
@@ -23,12 +24,30 @@ import { Separator } from "@/components/ui/separator";
 
 const complianceStandards = ["FDA 21 CFR", "IEC 62304", "ISO 13485", "GDPR", "ISO 27001"];
 
+interface TestCaseWithCompliance {
+  testCase: string;
+  compliance: string[];
+}
+
 export function RequirementsForm() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ParseRequirementsAndGenerateTestCasesOutput | null>(null);
+  const [processedResults, setProcessedResults] = useState<TestCaseWithCompliance[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (result) {
+      const newProcessedResults = result.testCases.map((testCase) => ({
+        testCase,
+        compliance: complianceStandards
+          .sort(() => 0.5 - Math.random())
+          .slice(0, Math.floor(Math.random() * 3) + 1),
+      }));
+      setProcessedResults(newProcessedResults);
+    }
+  }, [result]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -36,6 +55,7 @@ export function RequirementsForm() {
       setFile(selectedFile);
       setResult(null);
       setError(null);
+      setProcessedResults([]);
     }
   };
 
@@ -53,6 +73,7 @@ export function RequirementsForm() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setProcessedResults([]);
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -159,37 +180,33 @@ export function RequirementsForm() {
         </Card>
       )}
 
-      {result && (
+      {processedResults.length > 0 && (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
                     <ListChecks className="h-6 w-6" /> Generated Test Cases
                 </CardTitle>
                 <CardDescription>
-                    {result.testCases.length} test cases have been generated. Each case includes traceability and compliance mapping.
+                    {processedResults.length} test cases have been generated. Each case includes traceability and compliance mapping.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                {result.testCases.map((testCase, index) => (
+                {processedResults.map((item, index) => (
                     <Card key={index} className="bg-secondary/50">
                         <CardHeader>
                             <CardTitle className="text-base">Test Case #{index + 1}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="mb-4">{testCase}</p>
+                            <p className="mb-4">{item.testCase}</p>
                             <Separator />
                             <div className="mt-4 space-y-2">
                                 <h4 className="text-sm font-semibold flex items-center gap-2">
                                     <CheckCircle className="h-4 w-4 text-accent-foreground" /> Compliance Mapping
                                 </h4>
                                 <div className="flex flex-wrap gap-2">
-                                    {complianceStandards
-                                        .sort(() => 0.5 - Math.random())
-                                        .slice(0, Math.floor(Math.random() * 3) + 1)
-                                        .map(standard => (
-                                            <Badge key={standard} variant="outline" className="bg-background">{standard}</Badge>
-                                        ))
-                                    }
+                                    {item.compliance.map(standard => (
+                                        <Badge key={standard} variant="outline" className="bg-background">{standard}</Badge>
+                                    ))}
                                 </div>
                             </div>
                         </CardContent>
