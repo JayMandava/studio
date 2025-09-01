@@ -80,7 +80,12 @@ export function RequirementsForm() {
 
     reader.onload = async () => {
       try {
-        const dataUri = reader.result as string;
+        let dataUri = reader.result as string;
+        // Fix for MD files being sent with a generic MIME type
+        if (file.type === "" && file.name.endsWith(".md")) {
+          dataUri = dataUri.replace("data:application/octet-stream;", "data:text/markdown;");
+        }
+
         const response = await parseRequirementsAndGenerateTestCases({
           documentDataUri: dataUri,
         });
@@ -127,7 +132,7 @@ export function RequirementsForm() {
             <div className="grid w-full max-w-sm items-center gap-2">
               <Label htmlFor="requirements-file">Document</Label>
               <div className="flex gap-2">
-                <Input id="requirements-file" type="file" onChange={handleFileChange} accept=".pdf,.doc,.docx,.xml,.md" />
+                <Input id="requirements-file" type="file" onChange={handleFileChange} accept=".pdf,.doc,.docx,.xml,.md,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/xml,text/markdown" />
               </div>
               {file && <p className="text-sm text-muted-foreground flex items-center gap-2 pt-2"><FileText className="h-4 w-4"/> {file.name}</p>}
             </div>
