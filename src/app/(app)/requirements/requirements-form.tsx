@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   parseRequirementsAndGenerateTestCases,
   type ParseRequirementsAndGenerateTestCasesOutput,
@@ -37,17 +37,21 @@ export function RequirementsForm() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const initialCompliance = useMemo(() => {
+    return complianceStandards
+      .sort(() => 0.5 - Math.random())
+      .slice(0, Math.floor(Math.random() * 3) + 1);
+  }, []);
+
   useEffect(() => {
     if (result) {
       const newProcessedResults = result.testCases.map((testCase) => ({
         testCase,
-        compliance: complianceStandards
-          .sort(() => 0.5 - Math.random())
-          .slice(0, Math.floor(Math.random() * 3) + 1),
+        compliance: initialCompliance,
       }));
       setProcessedResults(newProcessedResults);
     }
-  }, [result]);
+  }, [result, initialCompliance]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -81,9 +85,16 @@ export function RequirementsForm() {
     reader.onload = async () => {
       try {
         let dataUri = reader.result as string;
-        // Fix for MD files being sent with a generic MIME type
-        if (file.type === "" && file.name.endsWith(".md")) {
-          dataUri = dataUri.replace("data:application/octet-stream;", "data:text/markdown;");
+        
+        const mimeType = file.type;
+        const fileName = file.name;
+
+        if ( (mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.md')) {
+            dataUri = dataUri.replace(/data:application\/octet-stream;|data:;/,'data:text/markdown;');
+        } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            dataUri = dataUri.replace('data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;', 'data:application/zip;');
+        } else if ( (mimeType === 'application/xml' || mimeType === 'text/xml') && fileName.endsWith('.xml') ) {
+            dataUri = dataUri.replace(/data:application\/xml;|data:text\/xml;/, 'data:text/plain;');
         }
 
         const response = await parseRequirementsAndGenerateTestCases({
