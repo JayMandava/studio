@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   parseRequirementsAndGenerateTestCases,
   type ParseRequirementsAndGenerateTestCasesOutput,
@@ -36,35 +36,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { jsPDF } from "jspdf";
 
 const complianceStandards = ["FDA 21 CFR", "IEC 62304", "ISO 13485", "GDPR", "ISO 27001"];
 
-interface TestCaseWithCompliance {
-  testCase: string;
-  compliance: string[];
+interface RequirementTestCase {
+  requirement: string;
+  testCases: string[];
 }
 
 export function RequirementsForm() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ParseRequirementsAndGenerateTestCasesOutput | null>(null);
-  const [processedResults, setProcessedResults] = useState<TestCaseWithCompliance[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [showDomainAlert, setShowDomainAlert] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (result && result.testCases && result.testCases.length > 0) {
-      const newProcessedResults = result.testCases.map((testCase) => ({
-        testCase,
-        compliance: complianceStandards
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 3) + 1),
-      }));
-      setProcessedResults(newProcessedResults);
-    }
-  }, [result]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -72,7 +61,6 @@ export function RequirementsForm() {
       setFile(selectedFile);
       setResult(null);
       setError(null);
-      setProcessedResults([]);
     }
   };
   
@@ -80,7 +68,6 @@ export function RequirementsForm() {
     setFile(null);
     setResult(null);
     setError(null);
-    setProcessedResults([]);
     if(fileInputRef.current) {
         fileInputRef.current.value = "";
     }
@@ -100,7 +87,6 @@ export function RequirementsForm() {
     setLoading(true);
     setError(null);
     setResult(null);
-    setProcessedResults([]);
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -126,10 +112,11 @@ export function RequirementsForm() {
           setShowDomainAlert(true);
         } else {
           setResult(response);
-          if (response.testCases) {
+          if (response.requirementTestCases) {
+            const totalTestCases = response.requirementTestCases.reduce((acc, curr) => acc + curr.testCases.length, 0);
             toast({
                 title: "Success!",
-                description: `Generated ${response.testCases.length} test cases from your document.`,
+                description: `Generated ${totalTestCases} test cases across ${response.requirementTestCases.length} requirements.`,
             });
           }
         }
@@ -158,69 +145,67 @@ export function RequirementsForm() {
   };
 
   const handleExport = (format: 'csv' | 'pdf') => {
-    if (!processedResults.length) return;
-
-    let content = '';
-    let mimeType = '';
-    let fileExtension = '';
+    if (!result || !result.requirementTestCases) return;
 
     if (format === 'csv') {
-        const header = 'Test Case ID,Test Case Description,Compliance Mapping\n';
-        const rows = processedResults.map((item, index) => 
-            `"${index + 1}","${item.testCase.replace(/"/g, '""')}","${item.compliance.join(', ')}"`
-        ).join('\n');
-        content = header + rows;
-        mimeType = 'text/csv';
-        fileExtension = 'csv';
-    } else {
-        // Basic PDF generation, for more complex PDFs a library like jsPDF would be needed
-        const { jsPDF } = require("jspdf");
-        const doc = new jsPDF();
+      const header = 'Requirement ID,Requirement Description,Test Case ID,Test Case Description\n';
+      const rows = result.requirementTestCases.flatMap((req, reqIndex) => 
+        req.testCases.map((tc, tcIndex) => 
+          `"${reqIndex + 1}","${req.requirement.replace(/"/g, '""')}","TC-${reqIndex + 1}.${tcIndex + 1}","${tc.replace(/"/g, '""')}"`
+        )
+      ).join('\n');
+      const content = header + rows;
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'requirements-test-cases.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else if (format === 'pdf') {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Requirements & Test Cases", 14, 22);
+
+      let y = 30;
+      result.requirementTestCases.forEach((item, index) => {
+        if (y > 260) { // Check for page break
+          doc.addPage();
+          y = 20;
+        }
         
-        doc.setFontSize(18);
-        doc.text("Generated Test Cases", 14, 22);
-
-        let y = 30;
-        processedResults.forEach((item, index) => {
-            if (y > 280) {
-                doc.addPage();
-                y = 20;
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        const reqLines = doc.splitTextToSize(`Requirement #${index + 1}: ${item.requirement}`, 180);
+        doc.text(reqLines, 14, y);
+        y += (reqLines.length * 6) + 4;
+        
+        doc.setFont(undefined, 'normal');
+        item.testCases.forEach((tc, tcIndex) => {
+            if (y > 280) { // Check for page break
+              doc.addPage();
+              y = 20;
             }
-            doc.setFontSize(12);
-            doc.text(`Test Case #${index + 1}`, 14, y);
-            y += 7;
-            
             doc.setFontSize(10);
-            const descriptionLines = doc.splitTextToSize(item.testCase, 180);
-            doc.text(descriptionLines, 14, y);
-            y += descriptionLines.length * 5;
-            
-            doc.setFontSize(10);
-            doc.text(`Compliance: ${item.compliance.join(', ')}`, 14, y);
-            y += 10;
+            const tcLines = doc.splitTextToSize(`- ${tc}`, 175);
+            doc.text(tcLines, 20, y);
+            y += (tcLines.length * 5) + 3;
         });
+        y += 5; // Extra space between requirements
+      });
 
-        const pdfOutput = doc.output('blob');
-        const url = URL.createObjectURL(pdfOutput);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'test-cases.pdf';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        return;
+      const pdfOutput = doc.output('blob');
+      const url = URL.createObjectURL(pdfOutput);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'requirements-test-cases.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
-
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `test-cases.${fileExtension}`;
-    document.body.appendChild(a);
-a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -270,7 +255,7 @@ a.click();
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || !file}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -317,15 +302,15 @@ a.click();
           </Card>
         )}
 
-        {processedResults.length > 0 && (
+        {result && result.requirementTestCases && result.requirementTestCases.length > 0 && (
           <Card>
-              <CardHeader className="flex-row items-center justify-between">
+              <CardHeader className="flex-row items-start justify-between gap-4">
                 <div>
                     <CardTitle className="flex items-center gap-2 text-primary">
                         <ListChecks className="h-6 w-6" /> Generated Test Cases
                     </CardTitle>
                     <CardDescription>
-                        {processedResults.length} test cases have been generated. Each case includes traceability and compliance mapping.
+                        {result.requirementTestCases.reduce((acc, curr) => acc + curr.testCases.length, 0)} test cases generated for {result.requirementTestCases.length} requirements.
                     </CardDescription>
                 </div>
                 <DropdownMenu>
@@ -343,27 +328,30 @@ a.click();
                 </DropdownMenu>
               </CardHeader>
               <CardContent className="space-y-4">
-                  {processedResults.map((item, index) => (
-                      <Card key={index} className="bg-secondary/50">
-                          <CardHeader>
-                              <CardTitle className="text-base">Test Case #{index + 1}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                              <p className="mb-4">{item.testCase}</p>
-                              <Separator />
-                              <div className="mt-4 space-y-2">
-                                  <h4 className="text-sm font-semibold flex items-center gap-2">
-                                      <CheckCircle className="h-4 w-4 text-accent-foreground" /> Compliance Mapping
-                                  </h4>
-                                  <div className="flex flex-wrap gap-2">
-                                      {item.compliance.map(standard => (
-                                          <Badge key={standard} variant="outline" className="bg-background">{standard}</Badge>
-                                      ))}
-                                  </div>
+                  <Accordion type="multiple" className="w-full">
+                    {result.requirementTestCases.map((item, index) => (
+                      <AccordionItem key={index} value={`item-${index}`}>
+                          <AccordionTrigger className="text-left hover:no-underline">
+                              <div className="flex flex-col gap-1.5">
+                                  <span className="font-semibold text-base">Requirement #{index + 1}</span>
+                                  <p className="font-normal text-muted-foreground">{item.requirement}</p>
                               </div>
-                          </CardContent>
-                      </Card>
-                  ))}
+                          </AccordionTrigger>
+                          <AccordionContent>
+                              <div className="pl-4 border-l-2 border-primary ml-2">
+                                <h4 className="font-semibold mb-3 mt-1">Generated Test Cases ({item.testCases.length})</h4>
+                                <ul className="list-disc space-y-3 pl-5">
+                                    {item.testCases.map((tc, tcIndex) => (
+                                        <li key={tcIndex} className="prose prose-sm max-w-none text-foreground">
+                                          {tc}
+                                        </li>
+                                    ))}
+                                </ul>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
               </CardContent>
           </Card>
         )}
