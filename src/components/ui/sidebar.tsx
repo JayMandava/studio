@@ -161,7 +161,8 @@ const Sidebar = React.forwardRef<
   React.ComponentProps<"div"> & {
     side?: "left" | "right"
     variant?: "sidebar" | "floating" | "inset"
-    collapsible?: "offcanvas" | "icon" | "none"
+    collapsible?: "offcanvas" | "icon" | "none",
+    title?: React.ReactNode
   }
 >(
   (
@@ -169,6 +170,7 @@ const Sidebar = React.forwardRef<
       side = "left",
       variant = "sidebar",
       collapsible = "offcanvas",
+      title,
       className,
       children,
       ...props
@@ -206,6 +208,7 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
+            {title && <SheetTitle>{title}</SheetTitle>}
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
         </Sheet>
@@ -365,7 +368,20 @@ const SidebarHeader = React.forwardRef<
 })
 SidebarHeader.displayName = "SidebarHeader"
 
-const SidebarTitle = SheetTitle
+const SidebarTitle = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div">
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    data-sidebar="title"
+    className={cn(
+      "duration-200 flex items-center p-2 text-sm font-medium transition-opacity ease-linear group-data-[collapsible=icon]:opacity-0",
+      className
+    )}
+    {...props}
+  />
+))
 SidebarTitle.displayName = "SidebarTitle"
 
 const SidebarFooter = React.forwardRef<

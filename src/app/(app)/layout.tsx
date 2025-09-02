@@ -4,7 +4,6 @@ import { Logo } from "@/components/logo";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, FileText, ShieldOff, Menu } from 'lucide-react';
-import { Button } from "@/components/ui/button";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const navItems = [
@@ -15,15 +14,17 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const mobileTitle = (
+    <VisuallyHidden>
+        <SidebarTitle>Main Navigation</SidebarTitle>
+    </VisuallyHidden>
+  );
 
   return (
     <>
-      <Sidebar>
+      <Sidebar title={mobileTitle}>
         <SidebarHeader>
           <Logo />
-           <VisuallyHidden>
-            <SidebarTitle>Main Navigation</SidebarTitle>
-          </VisuallyHidden>
         </SidebarHeader>
         <SidebarContent>
             <SidebarMenu>
