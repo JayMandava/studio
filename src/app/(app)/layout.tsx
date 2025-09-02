@@ -3,13 +3,14 @@ import { Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader
 import { Logo } from "@/components/logo";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, ShieldOff, Menu } from 'lucide-react';
+import { Home, FileText, ShieldOff, Menu, Book } from 'lucide-react';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
   { href: '/requirements', label: 'Requirements', icon: FileText },
   { href: '/anonymization', label: 'Anonymization', icon: ShieldOff },
+  { href: '/notebook', label: 'Notebook', icon: Book },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

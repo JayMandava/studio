@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck } from "lucide-react";
+import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { jsPDF } from "jspdf";
+import type { SavedNotebookEntry } from "@/app/(app)/notebook/notebook-view";
 
 const complianceStandards = ["FDA 21 CFR", "IEC 62304", "ISO 13485", "GDPR", "ISO 27001", "ISO 9001"];
 
@@ -213,6 +214,32 @@ export function RequirementsForm() {
     }
   };
 
+  const handleSaveToNotebook = () => {
+    if (!result) return;
+    try {
+        const savedEntries: SavedNotebookEntry[] = JSON.parse(localStorage.getItem('notebookEntries') || '[]');
+        const newEntry: SavedNotebookEntry = {
+            id: new Date().toISOString(),
+            date: new Date().toISOString(),
+            data: result,
+            fileName: file?.name || 'Untitled',
+        };
+        savedEntries.unshift(newEntry);
+        localStorage.setItem('notebookEntries', JSON.stringify(savedEntries));
+        toast({
+            title: "Saved to Notebook",
+            description: `The generated test cases for ${file?.name} have been saved.`,
+        });
+    } catch (e) {
+        console.error("Failed to save to notebook:", e);
+        toast({
+            variant: "destructive",
+            title: "Failed to save",
+            description: "There was an error saving the results to your notebook.",
+        });
+    }
+  };
+
   return (
     <>
       <AlertDialog open={showDomainAlert} onOpenChange={setShowDomainAlert}>
@@ -326,19 +353,25 @@ export function RequirementsForm() {
                         {result.requirementTestCases.reduce((acc, curr) => acc + curr.testCases.length, 0)} test cases generated for {result.requirementTestCases.length} requirements.
                     </CardDescription>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button>
-                      <Download className="mr-2 h-4 w-4" />
-                      Export
-                      <ChevronDown className="ml-2 h-4 w-4" />
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={handleSaveToNotebook}>
+                        <Save className="mr-2 h-4 w-4"/>
+                        Save to Notebook
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleExport('pdf')}>Export as PDF</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleExport('csv')}>Export as CSV</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button>
+                          <Download className="mr-2 h-4 w-4" />
+                          Export
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => handleExport('pdf')}>Export as PDF</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('csv')}>Export as CSV</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                   <Accordion type="multiple" className="w-full">
