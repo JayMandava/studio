@@ -99,8 +99,8 @@ export default function DashboardPage() {
             <div className="flex items-start gap-4">
                 <TestTubeDiagonal className="h-8 w-8 text-accent-foreground mt-1" />
                 <div>
-                    <h3 className="font-semibold">ALM Export</h3>
-                    <p className="text-sm text-muted-foreground">Seamlessly export to Jira, Polarion, and Azure DevOps to fit your workflow.</p>
+                    <h3 className="font-semibold">Integrations</h3>
+                    <p className="text-sm text-muted-foreground">Seamlessly export to Jira, Polarion, ALM, Azure DevOps etc. to fit your workflow.</p>
                 </div>
             </div>
              <div className="flex items-start gap-4">
