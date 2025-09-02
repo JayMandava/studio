@@ -140,12 +140,12 @@ export function RequirementsForm() {
 
   const handleExport = (format: 'csv' | 'pdf') => {
     if (!result || !result.requirementTestCases) return;
-
+  
     if (format === 'csv') {
-      const header = 'Requirement ID,Requirement Description,Test Case ID,Test Case Description\n';
-      const rows = result.requirementTestCases.flatMap((req, reqIndex) => 
-        req.testCases.map((tc, tcIndex) => 
-          `"${reqIndex + 1}","${req.requirement.replace(/"/g, '""')}","TC-${reqIndex + 1}.${tcIndex + 1}","${tc.replace(/"/g, '""')}"`
+      const header = 'Requirement ID,Requirement Description,Test Case ID,Test Case Description,Compliance Standards\n';
+      const rows = result.requirementTestCases.flatMap((req, reqIndex) =>
+        req.testCases.map((tc, tcIndex) =>
+          `"${reqIndex + 1}","${req.requirement.replace(/"/g, '""')}","TC-${reqIndex + 1}.${tcIndex + 1}","${tc.description.replace(/"/g, '""')}","${tc.compliance.join(', ')}"`
         )
       ).join('\n');
       const content = header + rows;
@@ -162,34 +162,45 @@ export function RequirementsForm() {
       const doc = new jsPDF();
       doc.setFontSize(18);
       doc.text("Requirements & Test Cases", 14, 22);
-
+  
       let y = 30;
       result.requirementTestCases.forEach((item, index) => {
-        if (y > 260) { // Check for page break
+        if (y > 260) {
           doc.addPage();
           y = 20;
         }
-        
+  
         doc.setFontSize(14);
         doc.setFont(undefined, 'bold');
         const reqLines = doc.splitTextToSize(`Requirement #${index + 1}: ${item.requirement}`, 180);
         doc.text(reqLines, 14, y);
         y += (reqLines.length * 6) + 4;
-        
+  
         doc.setFont(undefined, 'normal');
-        item.testCases.forEach((tc, tcIndex) => {
-            if (y > 280) { // Check for page break
-              doc.addPage();
-              y = 20;
-            }
-            doc.setFontSize(10);
-            const tcLines = doc.splitTextToSize(`- ${tc}`, 175);
-            doc.text(tcLines, 20, y);
-            y += (tcLines.length * 5) + 3;
+        item.testCases.forEach((tc) => {
+          if (y > 280) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.setFontSize(10);
+          const tcLines = doc.splitTextToSize(`- ${tc.description}`, 175);
+          doc.text(tcLines, 20, y);
+          y += (tcLines.length * 5);
+          
+          if (tc.compliance.length > 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(100);
+            const complianceLine = `Standards: ${tc.compliance.join(', ')}`;
+            const complianceLines = doc.splitTextToSize(complianceLine, 170);
+            doc.text(complianceLines, 22, y + 1);
+            y += (complianceLines.length * 4) + 2;
+            doc.setTextColor(0);
+          }
+           y += 3;
         });
-        y += 5; // Extra space between requirements
+        y += 5;
       });
-
+  
       const pdfOutput = doc.output('blob');
       const url = URL.createObjectURL(pdfOutput);
       const a = document.createElement('a');
@@ -342,10 +353,19 @@ export function RequirementsForm() {
                           <AccordionContent>
                               <div className="pl-4 border-l-2 border-primary ml-2">
                                 <h4 className="font-semibold mb-3 mt-1">Generated Test Cases ({item.testCases.length})</h4>
-                                <ul className="list-disc space-y-3 pl-5">
+                                <ul className="space-y-4">
                                     {item.testCases.map((tc, tcIndex) => (
-                                        <li key={tcIndex} className="prose prose-sm max-w-none text-foreground">
-                                          {tc}
+                                        <li key={tcIndex} className="prose prose-sm max-w-none text-foreground list-none">
+                                          <p className="m-0">{tc.description}</p>
+                                          {tc.compliance && tc.compliance.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                              {tc.compliance.map(standard => (
+                                                <Badge key={standard} variant="outline" className="font-normal">
+                                                  {standard}
+                                                </Badge>
+                                              ))}
+                                            </div>
+                                          )}
                                         </li>
                                     ))}
                                 </ul>
