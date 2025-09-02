@@ -120,7 +120,7 @@ const IntegrationCard = ({
             <FormItem className="mb-4">
               <FormLabel>Instance URL</FormLabel>
               <FormControl>
-                <Input placeholder="https://your-instance.com" {...field} />
+                <Input placeholder="https://your-instance.com" {...field} value={field.value || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -133,7 +133,7 @@ const IntegrationCard = ({
             <FormItem className="mb-4">
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="your.username" {...field} />
+                <Input placeholder="your.username" {...field} value={field.value || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -146,7 +146,7 @@ const IntegrationCard = ({
             <FormItem className="mb-6">
               <FormLabel>API Token / Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••••••" {...field} />
+                <Input type="password" placeholder="••••••••••••" {...field} value={field.value || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
