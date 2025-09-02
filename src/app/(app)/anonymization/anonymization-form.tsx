@@ -4,6 +4,9 @@ import { useState } from "react";
 import {
   anonymizeHealthDataAndGenerateGDPRSummary,
   type GDPRComplianceReportOutput,
+  piiCategories,
+  anonymizationStrategies,
+  type AnonymizeHealthDataInput,
 } from "@/ai/flows/anonymize-health-data-and-generate-gdpr-summary";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +31,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function AnonymizationForm() {
   const [healthData, setHealthData] = useState("");
@@ -36,6 +41,16 @@ export function AnonymizationForm() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [showDomainAlert, setShowDomainAlert] = useState(false);
+  const [strategy, setStrategy] = useState<AnonymizeHealthDataInput['anonymizationStrategy']>(anonymizationStrategies[0]);
+  const [selectedPii, setSelectedPii] = useState<AnonymizeHealthDataInput['piiCategories']>(piiCategories.slice());
+
+  const handlePiiChange = (category: typeof piiCategories[number], checked: boolean | 'indeterminate') => {
+    if (checked) {
+      setSelectedPii((prev) => [...prev, category]);
+    } else {
+      setSelectedPii((prev) => prev.filter((item) => item !== category));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,13 +62,25 @@ export function AnonymizationForm() {
       });
       return;
     }
+    if (selectedPii.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No PII selected",
+        description: "Please select at least one PII category to anonymize.",
+      });
+      return;
+    }
 
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const response = await anonymizeHealthDataAndGenerateGDPRSummary({ healthData });
+      const response = await anonymizeHealthDataAndGenerateGDPRSummary({
+        healthData,
+        anonymizationStrategy: strategy,
+        piiCategories: selectedPii,
+      });
       if (!response.isHealthcareDomain) {
         setShowDomainAlert(true);
       } else {
@@ -99,10 +126,10 @@ export function AnonymizationForm() {
             <CardHeader>
               <CardTitle>Anonymize Health Data</CardTitle>
               <CardDescription>
-                Paste any text containing sensitive health information. The AI will remove personally identifiable information (PII).
+                Paste sensitive health information, choose an anonymization strategy and the AI will remove the selected PII.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
               <div className="grid w-full gap-2">
                 <Label htmlFor="health-data">Sensitive Health Data</Label>
                 <Textarea
@@ -114,6 +141,39 @@ export function AnonymizationForm() {
                   disabled={loading}
                 />
               </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                 <div>
+                    <Label className="text-base">Anonymization Strategy</Label>
+                    <p className="text-sm text-muted-foreground mb-4">Select how PII should be transformed.</p>
+                    <RadioGroup value={strategy} onValueChange={(value) => setStrategy(value as AnonymizeHealthDataInput['anonymizationStrategy'])} disabled={loading}>
+                      {anonymizationStrategies.map((item) => (
+                        <div key={item} className="flex items-center space-x-2">
+                          <RadioGroupItem value={item} id={item} />
+                          <Label htmlFor={item} className="font-normal">{item}</Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                 </div>
+                 <div>
+                    <Label className="text-base">PII Categories to Anonymize</Label>
+                    <p className="text-sm text-muted-foreground mb-4">Choose which types of data to find and anonymize.</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {piiCategories.map((item) => (
+                        <div key={item} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={item}
+                            checked={selectedPii.includes(item)}
+                            onCheckedChange={(checked) => handlePiiChange(item, checked)}
+                            disabled={loading}
+                          />
+                          <Label htmlFor={item} className="font-normal">{item}</Label>
+                        </div>
+                      ))}
+                    </div>
+                 </div>
+              </div>
+
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={loading}>
@@ -177,7 +237,7 @@ export function AnonymizationForm() {
                   Anonymized Data
                 </CardTitle>
                 <CardDescription>
-                  All personally identifiable information has been removed or replaced.
+                  PII has been transformed based on your selected strategy and categories.
                 </CardDescription>
               </CardHeader>
               <CardContent>
