@@ -4,8 +4,6 @@ import { useState } from "react";
 import {
   anonymizeHealthDataAndGenerateGDPRSummary,
   type GDPRComplianceReportOutput,
-  piiCategories,
-  anonymizationStrategies,
   type AnonymizeHealthDataInput,
 } from "@/ai/flows/anonymize-health-data-and-generate-gdpr-summary";
 import { Button } from "@/components/ui/button";
@@ -34,6 +32,18 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+export const piiCategories = [
+  'Names',
+  'Dates of Birth',
+  'Addresses',
+  'Phone Numbers',
+  'Email Addresses',
+  'Medical Record Numbers',
+  'Other',
+] as const;
+export const anonymizationStrategies = ['Redact', 'Replace', 'Mask'] as const;
+
+
 export function AnonymizationForm() {
   const [healthData, setHealthData] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,8 +51,8 @@ export function AnonymizationForm() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [showDomainAlert, setShowDomainAlert] = useState(false);
-  const [strategy, setStrategy] = useState<AnonymizeHealthDataInput['anonymizationStrategy']>(anonymizationStrategies[0]);
-  const [selectedPii, setSelectedPii] = useState<AnonymizeHealthDataInput['piiCategories']>(piiCategories.slice());
+  const [strategy, setStrategy] = useState<(typeof anonymizationStrategies)[number]>(anonymizationStrategies[0]);
+  const [selectedPii, setSelectedPii] = useState<(typeof piiCategories)[number][]>(piiCategories.slice());
 
   const handlePiiChange = (category: typeof piiCategories[number], checked: boolean | 'indeterminate') => {
     if (checked) {
@@ -146,7 +156,7 @@ export function AnonymizationForm() {
                  <div>
                     <Label className="text-base">Anonymization Strategy</Label>
                     <p className="text-sm text-muted-foreground mb-4">Select how PII should be transformed.</p>
-                    <RadioGroup value={strategy} onValueChange={(value) => setStrategy(value as AnonymizeHealthDataInput['anonymizationStrategy'])} disabled={loading}>
+                    <RadioGroup value={strategy} onValueChange={(value) => setStrategy(value as (typeof anonymizationStrategies)[number])} disabled={loading}>
                       {anonymizationStrategies.map((item) => (
                         <div key={item} className="flex items-center space-x-2">
                           <RadioGroupItem value={item} id={item} />

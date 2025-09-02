@@ -12,17 +12,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { piiCategories, anonymizationStrategies } from '@/app/(app)/anonymization/anonymization-form';
 
-export const piiCategories = [
-  'Names',
-  'Dates of Birth',
-  'Addresses',
-  'Phone Numbers',
-  'Email Addresses',
-  'Medical Record Numbers',
-  'Other',
-] as const;
-export const anonymizationStrategies = ['Redact', 'Replace', 'Mask'] as const;
 
 const AnonymizeHealthDataInputSchema = z.object({
   healthData: z
@@ -31,10 +22,10 @@ const AnonymizeHealthDataInputSchema = z.object({
       'The sensitive health data to anonymize. This can be in various formats such as text, PDF, or XML.'
     ),
   anonymizationStrategy: z
-    .enum(anonymizationStrategies)
+    .string()
     .describe('The anonymization strategy to apply.'),
   piiCategories: z
-    .array(z.enum(piiCategories))
+    .array(z.string())
     .describe('The categories of PII to anonymize.'),
 });
 export type AnonymizeHealthDataInput = z.infer<typeof AnonymizeHealthDataInputSchema>;
@@ -104,4 +95,3 @@ const anonymizeHealthDataAndGenerateGDPRSummaryFlow = ai.defineFlow(
     return output!;
   }
 );
-
