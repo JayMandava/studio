@@ -1,10 +1,10 @@
+
 "use client";
 
 import { useState } from "react";
 import {
   anonymizeHealthDataAndGenerateGDPRSummary,
   type GDPRComplianceReportOutput,
-  type AnonymizeHealthDataInput,
 } from "@/ai/flows/anonymize-health-data-and-generate-gdpr-summary";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck, Sparkles, Lightbulb, AlertTriangle } from "lucide-react";
+import { Loader2, ShieldCheck, Sparkles, Lightbulb, AlertTriangle, Copy, Check } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const piiCategories = [
   'Names',
@@ -43,6 +45,7 @@ export const piiCategories = [
 ] as const;
 export const anonymizationStrategies = ['Redact', 'Replace', 'Mask'] as const;
 
+type CopiedField = 'anonymizedData' | 'complianceSummary' | 'suggestedInformation' | null;
 
 export function AnonymizationForm() {
   const [healthData, setHealthData] = useState("");
@@ -53,6 +56,7 @@ export function AnonymizationForm() {
   const [showDomainAlert, setShowDomainAlert] = useState(false);
   const [strategy, setStrategy] = useState<(typeof anonymizationStrategies)[number]>(anonymizationStrategies[0]);
   const [selectedPii, setSelectedPii] = useState<(typeof piiCategories)[number][]>(piiCategories.slice());
+  const [copiedField, setCopiedField] = useState<CopiedField>(null);
 
   const handlePiiChange = (category: typeof piiCategories[number], checked: boolean | 'indeterminate') => {
     if (checked) {
@@ -60,6 +64,15 @@ export function AnonymizationForm() {
     } else {
       setSelectedPii((prev) => prev.filter((item) => item !== category));
     }
+  };
+
+  const handleCopy = (text: string | undefined, field: NonNullable<CopiedField>) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => {
+        setCopiedField(null);
+    }, 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -239,52 +252,101 @@ export function AnonymizationForm() {
         )}
 
         {result && result.anonymizedData && (
+        <TooltipProvider>
           <div className="grid gap-8">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShieldCheck className="h-6 w-6 text-primary" />
-                  Anonymized Data
-                </CardTitle>
-                <CardDescription>
-                  PII has been transformed based on your selected strategy and categories.
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShieldCheck className="h-6 w-6 text-primary" />
+                    Anonymized Data
+                  </CardTitle>
+                  <CardDescription>
+                    PII has been transformed based on your selected strategy and categories.
+                  </CardDescription>
+                </div>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={() => handleCopy(result.anonymizedData, 'anonymizedData')}>
+                            {copiedField === 'anonymizedData' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Copy to clipboard</p>
+                    </TooltipContent>
+                </Tooltip>
               </CardHeader>
               <CardContent>
-                <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto">
-                  <code>{result.anonymizedData}</code>
-                </pre>
+                <ScrollArea className="h-60">
+                    <pre className="text-sm bg-muted p-4 rounded-md whitespace-pre-wrap">
+                    <code>{result.anonymizedData}</code>
+                    </pre>
+                </ScrollArea>
               </CardContent>
             </Card>
             
             <div className="grid gap-8 md:grid-cols-2">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="h-6 w-6 text-accent-foreground" />
-                    GDPR Compliance Summary
-                  </CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div className="space-y-1.5">
+                    <CardTitle className="flex items-center gap-2">
+                      <ShieldCheck className="h-6 w-6 text-accent-foreground" />
+                      GDPR Compliance Summary
+                    </CardTitle>
+                  </div>
+                   <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={() => handleCopy(result.complianceSummary, 'complianceSummary')}>
+                                {copiedField === 'complianceSummary' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Copy to clipboard</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </CardHeader>
-                <CardContent className="prose prose-sm max-w-none text-foreground">
-                  <p>{result.complianceSummary}</p>
+                <CardContent>
+                    <ScrollArea className="h-40">
+                        <div className="prose prose-sm max-w-none text-foreground pr-4">
+                            <p>{result.complianceSummary}</p>
+                        </div>
+                    </ScrollArea>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-6 w-6 text-accent-foreground" />
-                    Suggested Information
-                  </CardTitle>
+                 <CardHeader className="flex flex-row items-center justify-between">
+                  <div className="space-y-1.5">
+                    <CardTitle className="flex items-center gap-2">
+                      <Lightbulb className="h-6 w-6 text-accent-foreground" />
+                      Suggested Information
+                    </CardTitle>
+                  </div>
+                   <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" onClick={() => handleCopy(result.suggestedInformation, 'suggestedInformation')}>
+                                {copiedField === 'suggestedInformation' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Copy to clipboard</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </CardHeader>
-                <CardContent className="prose prose-sm max-w-none text-foreground">
-                  <p>{result.suggestedInformation}</p>
+                <CardContent>
+                    <ScrollArea className="h-40">
+                        <div className="prose prose-sm max-w-none text-foreground pr-4">
+                            <p>{result.suggestedInformation}</p>
+                        </div>
+                    </ScrollArea>
                 </CardContent>
               </Card>
             </div>
           </div>
+          </TooltipProvider>
         )}
       </div>
     </>
   );
 }
+
