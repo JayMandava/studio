@@ -274,98 +274,100 @@ export function NotebookView() {
         onOpenChange={isOpen => !isOpen && setSelectedEntry(null)}
       >
         <DialogContent className="max-w-4xl">
-          <DialogHeader className="flex-row items-center justify-between space-y-0">
-            <div className="space-y-1.5">
-              <DialogTitle className="flex items-center gap-2 text-primary">
-                <ListChecks className="h-6 w-6" />
-                {selectedEntry?.fileName}
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                Saved on {new Date(selectedEntry?.date || '').toLocaleString()}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => handleExport('pdf', selectedEntry)}
-                  >
-                    Export as PDF
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleExport('csv', selectedEntry)}
-                  >
-                    Export as CSV
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-primary">
+              <ListChecks className="h-6 w-6" />
+              {selectedEntry?.fileName}
+            </DialogTitle>
           </DialogHeader>
 
           {selectedEntry && (
-            <ScrollArea className="h-[60vh]">
-              <div className="pr-6">
-                <Accordion
-                  type="multiple"
-                  className="w-full"
-                >
-                  {selectedEntry.data.requirementTestCases?.map(
-                    (item, index) => (
-                      <AccordionItem key={index} value={`item-${index}`}>
-                        <AccordionTrigger className="text-left hover:no-underline">
-                          <div className="flex flex-col gap-1.5">
-                            <span className="font-semibold text-base">
-                              Requirement #{index + 1}
-                            </span>
-                            <p className="font-normal text-muted-foreground">
-                              {item.requirement}
-                            </p>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="ml-2 border-l-2 border-primary pl-4">
-                            <h4 className="mb-3 mt-1 font-semibold">
-                              Generated Test Cases ({item.testCases.length})
-                            </h4>
-                            <ul className="space-y-4">
-                              {item.testCases.map((tc, tcIndex) => (
-                                <li
-                                  key={tcIndex}
-                                  className="prose prose-sm max-w-none list-none text-foreground"
-                                >
-                                  <p className="m-0">{tc.description}</p>
-                                  {tc.compliance &&
-                                    tc.compliance.length > 0 && (
-                                      <div className="mt-2 flex flex-wrap gap-2">
-                                        {tc.compliance.map(standard => (
-                                          <Badge
-                                            key={standard}
-                                            variant="outline"
-                                            className="font-normal"
-                                          >
-                                            {standard}
-                                          </Badge>
-                                        ))}
-                                      </div>
-                                    )}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    )
-                  )}
-                </Accordion>
+            <>
+              <div className="flex flex-col space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Saved on {new Date(selectedEntry?.date || '').toLocaleString()}
+                </p>
+                <div className="flex items-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        onClick={() => handleExport('pdf', selectedEntry)}
+                      >
+                        Export as PDF
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleExport('csv', selectedEntry)}
+                      >
+                        Export as CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-            </ScrollArea>
+              <ScrollArea className="h-[55vh] pt-4">
+                <div className="pr-6">
+                  <Accordion
+                    type="multiple"
+                    className="w-full"
+                  >
+                    {selectedEntry.data.requirementTestCases?.map(
+                      (item, index) => (
+                        <AccordionItem key={index} value={`item-${index}`}>
+                          <AccordionTrigger className="text-left hover:no-underline">
+                            <div className="flex flex-col gap-1.5">
+                              <span className="font-semibold text-base">
+                                Requirement #{index + 1}
+                              </span>
+                              <p className="font-normal text-muted-foreground">
+                                {item.requirement}
+                              </p>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <div className="ml-2 border-l-2 border-primary pl-4">
+                              <h4 className="mb-3 mt-1 font-semibold">
+                                Generated Test Cases ({item.testCases.length})
+                              </h4>
+                              <ul className="space-y-4">
+                                {item.testCases.map((tc, tcIndex) => (
+                                  <li
+                                    key={tcIndex}
+                                    className="prose prose-sm max-w-none list-none text-foreground"
+                                  >
+                                    <p className="m-0">{tc.description}</p>
+                                    {tc.compliance &&
+                                      tc.compliance.length > 0 && (
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                          {tc.compliance.map(standard => (
+                                            <Badge
+                                              key={standard}
+                                              variant="outline"
+                                              className="font-normal"
+                                            >
+                                              {standard}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      )}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      )
+                    )}
+                  </Accordion>
+                </div>
+              </ScrollArea>
+            </>
           )}
         </DialogContent>
       </Dialog>
