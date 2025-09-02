@@ -306,12 +306,6 @@ export function NotebookView() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <DialogClose asChild>
-                <Button variant="ghost" size="icon">
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
-                </Button>
-              </DialogClose>
             </div>
           </DialogHeader>
 
@@ -321,9 +315,6 @@ export function NotebookView() {
                 <Accordion
                   type="multiple"
                   className="w-full"
-                  defaultValue={selectedEntry.data.requirementTestCases?.map(
-                    (_, index) => `item-${index}`
-                  )}
                 >
                   {selectedEntry.data.requirementTestCases?.map(
                     (item, index) => (

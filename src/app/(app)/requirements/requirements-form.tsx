@@ -61,8 +61,6 @@ export function RequirementsForm() {
   
   const handleRemoveFile = () => {
     setFile(null);
-    setResult(null);
-    setError(null);
     if(fileInputRef.current) {
         fileInputRef.current.value = "";
     }
@@ -374,7 +372,7 @@ export function RequirementsForm() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                  <Accordion type="multiple" className="w-full">
+                  <Accordion type="multiple" className="w-full" defaultValue={result.requirementTestCases.map((_, index) => `item-${index}`)}>
                     {result.requirementTestCases.map((item, index) => (
                       <AccordionItem key={index} value={`item-${index}`}>
                           <AccordionTrigger className="text-left hover:no-underline">
