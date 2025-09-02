@@ -74,7 +74,7 @@ const anonymizeHealthDataPrompt = ai.definePrompt({
 
   2.  Analyze the anonymized data for GDPR compliance.
   3.  Provide a summary report of the compliance analysis. **Format this as a Markdown list.**
-  4.  Suggest any missing information or steps to improve GDPR compliance. **Format this as a Markdown list. Make any subheadings bold, for example, by wrapping them in **.**
+  4.  Suggest any missing information or steps to improve GDPR compliance. **Format this as a Markdown list. Make any subheadings bold by wrapping them in **, and ensure the subheading and its content are part of the same bullet point.**
 
   Health Data: {{{healthData}}}
 
@@ -93,4 +93,3 @@ const anonymizeHealthDataAndGenerateGDPRSummaryFlow = ai.defineFlow(
     return output!;
   }
 );
-
