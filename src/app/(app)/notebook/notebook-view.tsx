@@ -9,7 +9,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +16,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from '@/components/ui/dialog';
 import {
   Accordion,
@@ -32,6 +30,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { jsPDF } from 'jspdf';
 import {
@@ -40,8 +39,8 @@ import {
   Clock,
   Download,
   ChevronDown,
-  X,
   ListChecks,
+  Send,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -54,6 +53,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export type SavedNotebookEntry = {
   id: string;
@@ -67,6 +67,8 @@ export function NotebookView() {
   const [selectedEntry, setSelectedEntry] =
     useState<SavedNotebookEntry | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [activeIntegrations, setActiveIntegrations] = useState<any[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsMounted(true);
@@ -75,8 +77,14 @@ export function NotebookView() {
         localStorage.getItem('notebookEntries') || '[]'
       );
       setEntries(savedEntries);
+      
+      const savedIntegrations = localStorage.getItem('almIntegrations');
+      if (savedIntegrations) {
+        const parsed = JSON.parse(savedIntegrations);
+        setActiveIntegrations(parsed.filter((p: any) => p.isActive));
+      }
     } catch (e) {
-      console.error('Failed to parse notebook entries from localStorage:', e);
+      console.error('Failed to parse data from localStorage:', e);
       setEntries([]);
     }
   }, []);
@@ -85,6 +93,13 @@ export function NotebookView() {
     localStorage.removeItem('notebookEntries');
     setEntries([]);
   };
+  
+  const handleAlmExport = (tool: string) => {
+    toast({
+        title: `Exporting to ${tool}`,
+        description: `Your test cases are being exported. This feature is coming soon.`,
+    });
+  }
 
   const handleExport = (
     format: 'csv' | 'pdf',
@@ -283,14 +298,14 @@ export function NotebookView() {
 
           {selectedEntry && (
             <>
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-4">
                 <p className="text-sm text-muted-foreground">
                   Saved on {new Date(selectedEntry?.date || '').toLocaleString()}
                 </p>
                 <div className="flex items-center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline">
+                      <Button>
                         <Download className="mr-2 h-4 w-4" />
                         Export
                         <ChevronDown className="ml-2 h-4 w-4" />
@@ -307,6 +322,13 @@ export function NotebookView() {
                       >
                         Export as CSV
                       </DropdownMenuItem>
+                      {activeIntegrations.length > 0 && <DropdownMenuSeparator />}
+                      {activeIntegrations.map((integration) => (
+                        <DropdownMenuItem key={integration.tool} onClick={() => handleAlmExport(integration.tool)}>
+                          <Send className="mr-2 h-4 w-4" />
+                          Export to {integration.tool}
+                        </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

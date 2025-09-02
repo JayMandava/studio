@@ -1,6 +1,7 @@
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, ShieldOff, ArrowRight, TestTubeDiagonal } from "lucide-react";
+import { FileText, ShieldOff, ArrowRight, TestTubeDiagonal, Puzzle } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
 
@@ -101,6 +102,13 @@ export default function DashboardPage() {
                 <div>
                     <h3 className="font-semibold">Interactive Visualization</h3>
                     <p className="text-sm text-muted-foreground">Visualize test coverage and compliance in an intuitive dashboard.</p>
+                </div>
+            </div>
+            <div className="flex items-start gap-4">
+                <Puzzle className="h-8 w-8 text-accent-foreground mt-1" />
+                <div>
+                    <h3 className="font-semibold">ALM Integrations</h3>
+                    <p className="text-sm text-muted-foreground">Connect to Jira, Azure DevOps, and more to export test cases directly.</p>
                 </div>
             </div>
         </CardContent>

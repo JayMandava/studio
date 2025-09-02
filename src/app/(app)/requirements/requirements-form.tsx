@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   parseRequirementsAndGenerateTestCases,
   type ParseRequirementsAndGenerateTestCasesOutput,
@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck, Save } from "lucide-react";
+import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck, Save, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -34,6 +34,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { jsPDF } from "jspdf";
@@ -49,13 +50,24 @@ export function RequirementsForm() {
   const { toast } = useToast();
   const [showDomainAlert, setShowDomainAlert] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [activeIntegrations, setActiveIntegrations] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const savedIntegrations = localStorage.getItem('almIntegrations');
+      if (savedIntegrations) {
+        const parsed = JSON.parse(savedIntegrations);
+        setActiveIntegrations(parsed.filter((p: any) => p.isActive));
+      }
+    } catch (e) {
+      console.error('Failed to load integrations from localStorage:', e);
+    }
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setResult(null);
-      setError(null);
     }
   };
   
@@ -211,6 +223,13 @@ export function RequirementsForm() {
       URL.revokeObjectURL(url);
     }
   };
+  
+  const handleAlmExport = (tool: string) => {
+    toast({
+        title: `Exporting to ${tool}`,
+        description: `Your test cases are being exported. This feature is coming soon.`,
+    });
+  }
 
   const handleSaveToNotebook = () => {
     if (!result) return;
@@ -367,6 +386,13 @@ export function RequirementsForm() {
                       <DropdownMenuContent>
                         <DropdownMenuItem onClick={() => handleExport('pdf')}>Export as PDF</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleExport('csv')}>Export as CSV</DropdownMenuItem>
+                         {activeIntegrations.length > 0 && <DropdownMenuSeparator />}
+                         {activeIntegrations.map((integration) => (
+                           <DropdownMenuItem key={integration.tool} onClick={() => handleAlmExport(integration.tool)}>
+                             <Send className="mr-2 h-4 w-4" />
+                             Export to {integration.tool}
+                           </DropdownMenuItem>
+                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
