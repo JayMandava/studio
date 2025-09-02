@@ -47,20 +47,27 @@ export const anonymizationStrategies = ['Redact', 'Replace', 'Mask'] as const;
 
 type CopiedField = 'anonymizedData' | 'complianceSummary' | 'suggestedInformation' | null;
 
-// A simple component to render markdown lists
 const MarkdownContent = ({ content }: { content?: string }) => {
   if (!content) return null;
-  
+
+  const processLine = (line: string) => {
+    // Remove leading list markers for processing
+    const trimmedLine = line.replace(/^[\*\-]\s*/, '');
+    // Bold any text wrapped in **
+    const boldedLine = trimmedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return boldedLine;
+  };
+
   const listItems = content.split('\n').filter(item => item.trim().startsWith('*') || item.trim().startsWith('-'));
 
-  if(listItems.length > 0) {
+  if (listItems.length > 0) {
     return (
       <ul className="list-disc space-y-2 pl-5">
         {listItems.map((item, index) => (
-          <li key={index} className="prose prose-sm max-w-none text-foreground">{item.substring(item.indexOf(' ')+1)}</li>
+          <li key={index} className="prose prose-sm max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: processLine(item) }} />
         ))}
       </ul>
-    )
+    );
   }
 
   return <p className="prose prose-sm max-w-none text-foreground">{content}</p>;
