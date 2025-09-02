@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -52,7 +53,7 @@ const GDPRComplianceReportOutputSchema = z.object({
     .describe('A summary of the GDPR compliance analysis of the anonymized data.'),
   suggestedInformation: z
     .string()
-    optional()
+    .optional()
     .describe(
       'Suggestions for any missing information or steps to improve GDPR compliance.'
     ),
@@ -103,3 +104,4 @@ const anonymizeHealthDataAndGenerateGDPRSummaryFlow = ai.defineFlow(
     return output!;
   }
 );
+
