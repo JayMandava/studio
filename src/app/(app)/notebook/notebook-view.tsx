@@ -274,8 +274,8 @@ export function NotebookView() {
         onOpenChange={isOpen => !isOpen && setSelectedEntry(null)}
       >
         <DialogContent className="max-w-4xl">
-          <DialogHeader className="flex-row items-start justify-between gap-4">
-            <div>
+          <DialogHeader className="flex-row items-center justify-between space-y-0">
+            <div className="space-y-1.5">
               <DialogTitle className="flex items-center gap-2 text-primary">
                 <ListChecks className="h-6 w-6" />
                 {selectedEntry?.fileName}
