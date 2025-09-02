@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import {
   parseRequirementsAndGenerateTestCases,
   type ParseRequirementsAndGenerateTestCasesOutput,
@@ -19,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Loader2, ListChecks, Download, CheckCircle, AlertTriangle, FileText, X } from "lucide-react";
+import { Upload, Loader2, ListChecks, Download, CheckCircle, AlertTriangle, FileText, X, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -31,6 +30,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const complianceStandards = ["FDA 21 CFR", "IEC 62304", "ISO 13485", "GDPR", "ISO 27001"];
 
@@ -152,6 +157,72 @@ export function RequirementsForm() {
     };
   };
 
+  const handleExport = (format: 'csv' | 'pdf') => {
+    if (!processedResults.length) return;
+
+    let content = '';
+    let mimeType = '';
+    let fileExtension = '';
+
+    if (format === 'csv') {
+        const header = 'Test Case ID,Test Case Description,Compliance Mapping\n';
+        const rows = processedResults.map((item, index) => 
+            `"${index + 1}","${item.testCase.replace(/"/g, '""')}","${item.compliance.join(', ')}"`
+        ).join('\n');
+        content = header + rows;
+        mimeType = 'text/csv';
+        fileExtension = 'csv';
+    } else {
+        // Basic PDF generation, for more complex PDFs a library like jsPDF would be needed
+        const { jsPDF } = require("jspdf");
+        const doc = new jsPDF();
+        
+        doc.setFontSize(18);
+        doc.text("Generated Test Cases", 14, 22);
+
+        let y = 30;
+        processedResults.forEach((item, index) => {
+            if (y > 280) {
+                doc.addPage();
+                y = 20;
+            }
+            doc.setFontSize(12);
+            doc.text(`Test Case #${index + 1}`, 14, y);
+            y += 7;
+            
+            doc.setFontSize(10);
+            const descriptionLines = doc.splitTextToSize(item.testCase, 180);
+            doc.text(descriptionLines, 14, y);
+            y += descriptionLines.length * 5;
+            
+            doc.setFontSize(10);
+            doc.text(`Compliance: ${item.compliance.join(', ')}`, 14, y);
+            y += 10;
+        });
+
+        const pdfOutput = doc.output('blob');
+        const url = URL.createObjectURL(pdfOutput);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'test-cases.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `test-cases.${fileExtension}`;
+    document.body.appendChild(a);
+a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <AlertDialog open={showDomainAlert} onOpenChange={setShowDomainAlert}>
@@ -248,13 +319,28 @@ export function RequirementsForm() {
 
         {processedResults.length > 0 && (
           <Card>
-              <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary">
-                      <ListChecks className="h-6 w-6" /> Generated Test Cases
-                  </CardTitle>
-                  <CardDescription>
-                      {processedResults.length} test cases have been generated. Each case includes traceability and compliance mapping.
-                  </CardDescription>
+              <CardHeader className="flex-row items-center justify-between">
+                <div>
+                    <CardTitle className="flex items-center gap-2 text-primary">
+                        <ListChecks className="h-6 w-6" /> Generated Test Cases
+                    </CardTitle>
+                    <CardDescription>
+                        {processedResults.length} test cases have been generated. Each case includes traceability and compliance mapping.
+                    </CardDescription>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button>
+                      <Download className="mr-2 h-4 w-4" />
+                      Export
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => handleExport('pdf')}>Export as PDF</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('csv')}>Export as CSV</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </CardHeader>
               <CardContent className="space-y-4">
                   {processedResults.map((item, index) => (
@@ -276,11 +362,6 @@ export function RequirementsForm() {
                                   </div>
                               </div>
                           </CardContent>
-                          <CardFooter className="justify-end gap-2">
-                              <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/>Jira</Button>
-                              <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/>Polarion</Button>
-                              <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/>Azure DevOps</Button>
-                          </CardFooter>
                       </Card>
                   ))}
               </CardContent>
