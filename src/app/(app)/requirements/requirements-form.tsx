@@ -18,9 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Loader2, ListChecks, Download, CheckCircle, AlertTriangle, FileText, X, ChevronDown } from "lucide-react";
+import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,12 +38,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { jsPDF } from "jspdf";
 
-const complianceStandards = ["FDA 21 CFR", "IEC 62304", "ISO 13485", "GDPR", "ISO 27001"];
-
-interface RequirementTestCase {
-  requirement: string;
-  testCases: string[];
-}
+const complianceStandards = ["FDA 21 CFR", "IEC 62304", "ISO 13485", "GDPR", "ISO 27001", "ISO 9001"];
 
 export function RequirementsForm() {
   const [file, setFile] = useState<File | null>(null);
@@ -231,8 +225,16 @@ export function RequirementsForm() {
             <CardHeader>
               <CardTitle>Upload Requirements Document</CardTitle>
               <CardDescription>
-                Select a PDF, XML and Markdown file containing your software requirements.
+                Select a PDF, XML and Markdown file containing your software requirements. The AI will consider the following standards when generating test cases:
               </CardDescription>
+                <div className="flex flex-wrap gap-2 pt-2">
+                    {complianceStandards.map((standard) => (
+                        <Badge key={standard} variant="secondary" className="flex items-center gap-1.5">
+                            <BadgeCheck className="h-3 w-3" />
+                            {standard}
+                        </Badge>
+                    ))}
+                </div>
             </CardHeader>
             <CardContent>
               <div className="grid w-full max-w-sm items-center gap-2">
