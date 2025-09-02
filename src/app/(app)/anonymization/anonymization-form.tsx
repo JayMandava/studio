@@ -47,6 +47,25 @@ export const anonymizationStrategies = ['Redact', 'Replace', 'Mask'] as const;
 
 type CopiedField = 'anonymizedData' | 'complianceSummary' | 'suggestedInformation' | null;
 
+// A simple component to render markdown lists
+const MarkdownContent = ({ content }: { content?: string }) => {
+  if (!content) return null;
+  
+  const listItems = content.split('\n').filter(item => item.trim().startsWith('*') || item.trim().startsWith('-'));
+
+  if(listItems.length > 0) {
+    return (
+      <ul className="list-disc space-y-2 pl-5">
+        {listItems.map((item, index) => (
+          <li key={index} className="prose prose-sm max-w-none text-foreground">{item.substring(item.indexOf(' ')+1)}</li>
+        ))}
+      </ul>
+    )
+  }
+
+  return <p className="prose prose-sm max-w-none text-foreground">{content}</p>;
+};
+
 export function AnonymizationForm() {
   const [healthData, setHealthData] = useState("");
   const [loading, setLoading] = useState(false);
@@ -306,10 +325,8 @@ export function AnonymizationForm() {
                     </Tooltip>
                 </CardHeader>
                 <CardContent>
-                    <ScrollArea className="h-40">
-                        <div className="prose prose-sm max-w-none text-foreground pr-4">
-                            <p>{result.complianceSummary}</p>
-                        </div>
+                    <ScrollArea className="h-40 pr-4">
+                       <MarkdownContent content={result.complianceSummary} />
                     </ScrollArea>
                 </CardContent>
               </Card>
@@ -334,10 +351,8 @@ export function AnonymizationForm() {
                     </Tooltip>
                 </CardHeader>
                 <CardContent>
-                    <ScrollArea className="h-40">
-                        <div className="prose prose-sm max-w-none text-foreground pr-4">
-                            <p>{result.suggestedInformation}</p>
-                        </div>
+                    <ScrollArea className="h-40 pr-4">
+                        <MarkdownContent content={result.suggestedInformation} />
                     </ScrollArea>
                 </CardContent>
               </Card>
@@ -349,4 +364,3 @@ export function AnonymizationForm() {
     </>
   );
 }
-

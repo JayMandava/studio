@@ -12,8 +12,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { piiCategories, anonymizationStrategies } from '@/app/(app)/anonymization/anonymization-form';
-
 
 const AnonymizeHealthDataInputSchema = z.object({
   healthData: z
@@ -41,12 +39,12 @@ const GDPRComplianceReportOutputSchema = z.object({
   complianceSummary: z
     .string()
     .optional()
-    .describe('A summary of the GDPR compliance analysis of the anonymized data.'),
+    .describe('A summary of the GDPR compliance analysis of the anonymized data, formatted as a Markdown list.'),
   suggestedInformation: z
     .string()
     .optional()
     .describe(
-      'Suggestions for any missing information or steps to improve GDPR compliance.'
+      'Suggestions for any missing information or steps to improve GDPR compliance, formatted as a Markdown list.'
     ),
 });
 export type GDPRComplianceReportOutput = z.infer<typeof GDPRComplianceReportOutputSchema>;
@@ -75,8 +73,8 @@ const anonymizeHealthDataPrompt = ai.definePrompt({
       -   PII Categories to Target: {{{piiCategories}}}
 
   2.  Analyze the anonymized data for GDPR compliance.
-  3.  Provide a summary report of the compliance analysis.
-  4.  Suggest any missing information or steps to improve GDPR compliance.
+  3.  Provide a summary report of the compliance analysis. **Format this as a Markdown list.**
+  4.  Suggest any missing information or steps to improve GDPR compliance. **Format this as a Markdown list.**
 
   Health Data: {{{healthData}}}
 
