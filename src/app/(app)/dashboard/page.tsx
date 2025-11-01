@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText, ShieldOff, ArrowRight, TestTubeDiagonal, Puzzle } from "lucide-react";
 import Link from 'next/link';
-import Image from "next/image";
 
 export default function DashboardPage() {
   return (
@@ -15,7 +14,14 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="rounded-lg border bg-card p-6 text-card-foreground">
+        <h2 className="text-2xl font-semibold">Ensuring Quality in HealthTech</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Leverage AI to meet rigorous standards and deliver safer medical software.
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
         <Card className="flex flex-col">
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -57,22 +63,6 @@ export default function DashboardPage() {
             </Button>
           </CardContent>
         </Card>
-
-        <div className="relative col-span-1 hidden overflow-hidden rounded-lg border lg:block">
-            <Image 
-                src="https://picsum.photos/600/400" 
-                alt="Healthcare technology" 
-                fill={true}
-                objectFit="cover"
-                data-ai-hint="healthcare technology"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-0 left-0 p-6">
-                <h3 className="text-xl font-bold text-white">Ensuring Quality in HealthTech</h3>
-                <p className="text-sm text-white/80 mt-2">Leverage AI to meet rigorous standards and deliver safer medical software.</p>
-            </div>
-        </div>
-
       </div>
 
       <Card>
