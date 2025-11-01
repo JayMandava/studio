@@ -16,10 +16,8 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="relative overflow-hidden rounded-lg border bg-card text-card-foreground">
-        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-card to-transparent" />
-        <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-card to-transparent" />
-        <div className="flex gap-12 whitespace-nowrap px-6 py-3 animate-ticker">
+      <div className="overflow-hidden">
+        <div className="flex gap-12 whitespace-nowrap py-1 text-card-foreground animate-ticker">
           {[...Array(2)].map((_, idx) => (
             <span
               key={idx}
