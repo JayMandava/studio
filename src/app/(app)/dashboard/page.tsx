@@ -3,17 +3,28 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText, ShieldOff, ArrowRight, TestTubeDiagonal, Puzzle } from "lucide-react";
 import Link from 'next/link';
+import Image from "next/image";
 
 export default function DashboardPage() {
   const tickerText = "Ensuring Quality in HealthTech — Leverage AI to meet rigorous standards and deliver safer medical software.";
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to HealthTestAI</h1>
-        <p className="text-muted-foreground">
-          Your intelligent partner for automated test case generation and compliance in healthcare.
-        </p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to HealthTestAI</h1>
+          <p className="text-muted-foreground">
+            Your intelligent partner for automated test case generation and compliance in healthcare.
+          </p>
+        </div>
+        <Image
+          src="/nasscom.png"
+          alt="Nasscom"
+          width={160}
+          height={160}
+          priority
+          className="h-auto w-32 md:w-40"
+        />
       </div>
 
       <div className="overflow-hidden">
