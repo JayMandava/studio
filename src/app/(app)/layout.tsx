@@ -43,8 +43,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             ))}
             </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter>
-          <div className="flex items-center justify-center py-2">
+        <SidebarFooter className="mt-auto">
+          <div className="flex items-end justify-center pb-4 pt-2">
             <Image
               src="/nasscom.png"
               alt="Nasscom"
