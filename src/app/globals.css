@@ -4,73 +4,115 @@
 
 @layer base {
   :root {
+    /* Base colors - Off White background with Blue Gray text */
     --background: 0 0% 100%;
-    --foreground: 0 0% 14%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 14%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 14%;
-    --primary: 358 71% 46%;
+    --foreground: 210 4% 29%; /* Blue Gray #454749 */
+
+    /* Cards - Off White #d5d6d4 */
+    --card: 60 4% 83%;
+    --card-foreground: 210 4% 29%; /* Blue Gray #454749 */
+
+    /* Popovers - Light Gray */
+    --popover: 90 3% 79%; /* Light Gray #cbcdca */
+    --popover-foreground: 210 4% 29%; /* Blue Gray #454749 */
+
+    /* Primary - Charcoal Gray for main actions */
+    --primary: 0 0% 43%; /* Charcoal Gray #6d6d6d */
     --primary-foreground: 0 0% 100%;
-    --secondary: 358 70% 96%;
-    --secondary-foreground: 0 0% 20%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 358 70% 90%;
-    --accent-foreground: 0 0% 20%;
-    --destructive: 0 72% 45%;
+
+    /* Secondary - Light Gray backgrounds */
+    --secondary: 90 3% 79%; /* Light Gray #cbcdca */
+    --secondary-foreground: 210 4% 29%; /* Blue Gray #454749 */
+
+    /* Muted - Off White with Gray text */
+    --muted: 60 4% 83%; /* Off White #d5d6d4 */
+    --muted-foreground: 120 1% 55%; /* Gray #8c8d8d */
+
+    /* Accent - Silver Gray for hover states */
+    --accent: 100 2% 66%; /* Silver Gray #a8aba9 */
+    --accent-foreground: 210 4% 29%; /* Blue Gray #454749 */
+
+    /* Destructive - keeping a subtle red for warnings */
+    --destructive: 0 50% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 358 71% 46%;
+
+    /* Borders and inputs - Light Gray */
+    --border: 90 3% 79%; /* Light Gray #cbcdca */
+    --input: 90 3% 79%; /* Light Gray #cbcdca */
+    --ring: 0 0% 43%; /* Charcoal Gray #6d6d6d */
     --radius: 0.5rem;
-    --chart-1: 358 71% 46%;
-    --chart-2: 358 71% 35%;
-    --chart-3: 358 71% 28%;
-    --chart-4: 358 55% 60%;
-    --chart-5: 0 0% 25%;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 14%;
-    --sidebar-primary: 358 71% 46%;
+
+    /* Charts - Grayscale gradient */
+    --chart-1: 0 0% 43%; /* Charcoal Gray #6d6d6d */
+    --chart-2: 240 1% 52%; /* Gray #838485 */
+    --chart-3: 120 1% 55%; /* Gray #8c8d8d */
+    --chart-4: 100 2% 66%; /* Silver Gray #a8aba9 */
+    --chart-5: 90 3% 79%; /* Light Gray #cbcdca */
+
+    /* Sidebar - Off White background */
+    --sidebar-background: 60 4% 83%; /* Off White #d5d6d4 */
+    --sidebar-foreground: 210 4% 29%; /* Blue Gray #454749 */
+    --sidebar-primary: 0 0% 43%; /* Charcoal Gray #6d6d6d */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 14%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 358 71% 46%;
+    --sidebar-accent: 100 2% 66%; /* Silver Gray #a8aba9 */
+    --sidebar-accent-foreground: 210 4% 29%; /* Blue Gray #454749 */
+    --sidebar-border: 90 3% 79%; /* Light Gray #cbcdca */
+    --sidebar-ring: 0 0% 43%; /* Charcoal Gray #6d6d6d */
   }
   .dark {
-    --background: 0 0% 8%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 96%;
-    --primary: 358 71% 46%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 358 30% 20%;
-    --secondary-foreground: 0 0% 96%;
-    --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 70%;
-    --accent: 358 40% 25%;
-    --accent-foreground: 0 0% 96%;
-    --destructive: 0 62.8% 30.6%;
+    /* Dark mode - Blue Gray base with lighter grays */
+    --background: 210 4% 18%; /* Darker Blue Gray */
+    --foreground: 90 3% 79%; /* Light Gray #cbcdca */
+
+    /* Cards - Slightly lighter than background */
+    --card: 210 4% 22%;
+    --card-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+
+    /* Popovers */
+    --popover: 210 4% 22%;
+    --popover-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+
+    /* Primary - Silver Gray for dark mode */
+    --primary: 100 2% 66%; /* Silver Gray #a8aba9 */
+    --primary-foreground: 210 4% 18%;
+
+    /* Secondary - Charcoal Gray */
+    --secondary: 0 0% 35%; /* Slightly lighter Charcoal */
+    --secondary-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+
+    /* Muted */
+    --muted: 210 4% 25%;
+    --muted-foreground: 120 1% 55%; /* Gray #8c8d8d */
+
+    /* Accent */
+    --accent: 0 0% 43%; /* Charcoal Gray #6d6d6d */
+    --accent-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+
+    /* Destructive */
+    --destructive: 0 50% 40%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 358 71% 46%;
-    --chart-1: 358 71% 46%;
-    --chart-2: 358 71% 38%;
-    --chart-3: 358 71% 32%;
-    --chart-4: 358 55% 60%;
-    --chart-5: 0 0% 80%;
-    --sidebar-background: 0 0% 12%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 358 71% 46%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 358 71% 46%;
+
+    /* Borders and inputs */
+    --border: 0 0% 43%; /* Charcoal Gray #6d6d6d */
+    --input: 0 0% 43%; /* Charcoal Gray #6d6d6d */
+    --ring: 100 2% 66%; /* Silver Gray #a8aba9 */
+
+    /* Charts - Reversed for dark mode */
+    --chart-1: 100 2% 66%; /* Silver Gray #a8aba9 */
+    --chart-2: 120 1% 55%; /* Gray #8c8d8d */
+    --chart-3: 240 1% 52%; /* Gray #838485 */
+    --chart-4: 0 0% 43%; /* Charcoal Gray #6d6d6d */
+    --chart-5: 90 3% 79%; /* Light Gray #cbcdca */
+
+    /* Sidebar */
+    --sidebar-background: 210 4% 22%;
+    --sidebar-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+    --sidebar-primary: 100 2% 66%; /* Silver Gray #a8aba9 */
+    --sidebar-primary-foreground: 210 4% 18%;
+    --sidebar-accent: 0 0% 35%;
+    --sidebar-accent-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+    --sidebar-border: 0 0% 43%; /* Charcoal Gray #6d6d6d */
+    --sidebar-ring: 100 2% 66%; /* Silver Gray #a8aba9 */
   }
 }
 
