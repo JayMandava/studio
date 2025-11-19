@@ -56,7 +56,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-4 md:p-6 overflow-x-hidden">
           {children}
         </main>
       </SidebarInset>
