@@ -1,10 +1,11 @@
 'use client';
-import { Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarInset, SidebarContent, SidebarTitle } from "@/components/ui/sidebar";
+import { Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarInset, SidebarContent, SidebarFooter, SidebarTitle } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, FileText, ShieldOff, Book, Puzzle } from 'lucide-react';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import Image from "next/image";
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -42,6 +43,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             ))}
             </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+          <div className="flex items-center justify-center py-2">
+            <Image
+              src="/nasscom.png"
+              alt="Nasscom"
+              width={120}
+              height={120}
+              className="h-auto w-24 opacity-90"
+            />
+          </div>
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <main className="flex-1 p-4 md:p-6">
