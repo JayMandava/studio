@@ -19,9 +19,9 @@ export default function DashboardPage() {
           <Image
             src="/nasscom.png"
             alt="Nasscom"
-            width={100}
-            height={100}
-            className="h-auto w-20"
+            width={140}
+            height={140}
+            className="h-auto w-28"
           />
         </div>
       </div>
