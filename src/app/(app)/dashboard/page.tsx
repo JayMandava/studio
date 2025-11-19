@@ -5,8 +5,6 @@ import { FileText, ShieldOff, ArrowRight, TestTubeDiagonal, Puzzle } from "lucid
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const tickerText = "Ensuring Quality in HealthTech — Leverage AI to meet rigorous standards and deliver safer medical software.";
-
   return (
     <div className="space-y-6">
       <div>
@@ -14,19 +12,6 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">
           Your intelligent partner for automated test case generation and compliance in healthcare.
         </p>
-      </div>
-
-      <div className="relative w-full overflow-hidden">
-        <div className="flex gap-12 whitespace-nowrap py-1 animate-ticker">
-          {[...Array(3)].map((_, idx) => (
-            <span
-              key={idx}
-              className="text-sm font-medium uppercase tracking-wide text-primary"
-            >
-              {tickerText}
-            </span>
-          ))}
-        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
