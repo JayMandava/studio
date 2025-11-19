@@ -8,8 +8,8 @@ export default function DashboardPage() {
   const tickerText = "Ensuring Quality in HealthTech — Leverage AI to meet rigorous standards and deliver safer medical software.";
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
+    <div className="space-y-6">
+      <div>
         <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to HealthTestAI</h1>
         <p className="text-muted-foreground">
           Your intelligent partner for automated test case generation and compliance in healthcare.
