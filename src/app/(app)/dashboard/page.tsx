@@ -29,21 +29,21 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="flex flex-col">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="grid size-12 place-items-center rounded-lg bg-primary/10 text-primary">
-                <FileText className="h-6 w-6" />
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
+                <FileText className="h-5 w-5" />
               </div>
-              <CardTitle>Requirements & Test Cases</CardTitle>
+              <CardTitle className="text-lg">Requirements & Test Cases</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col justify-between gap-4">
-            <CardDescription>
-              Upload a requirements document (PDF, XML, and Markdown) to automatically parse its content and generate comprehensive test cases.
+          <CardContent className="space-y-3">
+            <CardDescription className="text-sm">
+              Upload requirements documents to automatically generate comprehensive test cases.
             </CardDescription>
-            <Button asChild className="mt-auto w-full">
+            <Button asChild className="w-full" size="sm">
               <Link href="/requirements">
                 Generate Test Cases <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -51,20 +51,20 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="flex flex-col">
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="grid size-12 place-items-center rounded-lg bg-primary/10 text-primary">
-                <ShieldOff className="h-6 w-6" />
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
+                <ShieldOff className="h-5 w-5" />
               </div>
-              <CardTitle>Data Anonymization</CardTitle>
+              <CardTitle className="text-lg">Data Anonymization</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col justify-between gap-4">
-            <CardDescription>
-              Paste sensitive health data to anonymize it and receive a GDPR compliance report, ensuring data privacy and security.
+          <CardContent className="space-y-3">
+            <CardDescription className="text-sm">
+              Anonymize sensitive health data and receive GDPR compliance reports.
             </CardDescription>
-            <Button asChild className="mt-auto w-full">
+            <Button asChild className="w-full" size="sm">
               <Link href="/anonymization">
                 Anonymize Data <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -74,39 +74,39 @@ export default function DashboardPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Core Capabilities</CardTitle>
-          <CardDescription>
-            HealthTestAI provides an end-to-end solution for quality assurance in the medical software domain.
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Core Capabilities</CardTitle>
+          <CardDescription className="text-sm">
+            End-to-end quality assurance solution for medical software.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6 sm:grid-cols-2">
-            <div className="flex items-start gap-4">
-                <TestTubeDiagonal className="h-8 w-8 text-accent-foreground mt-1" />
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-start gap-3">
+                <TestTubeDiagonal className="h-6 w-6 text-accent-foreground mt-0.5 flex-shrink-0" />
                 <div>
-                    <h3 className="font-semibold">Compliance Mapping</h3>
-                    <p className="text-sm text-muted-foreground">Automatically map test cases to standards like FDA, GDPR, and ISO 13485.</p>
+                    <h3 className="font-semibold text-sm">Compliance Mapping</h3>
+                    <p className="text-xs text-muted-foreground">Map test cases to FDA, GDPR, and ISO 13485 standards.</p>
                 </div>
             </div>
-            <div className="flex items-start gap-4">
-                <TestTubeDiagonal className="h-8 w-8 text-accent-foreground mt-1" />
+            <div className="flex items-start gap-3">
+                <TestTubeDiagonal className="h-6 w-6 text-accent-foreground mt-0.5 flex-shrink-0" />
                 <div>
-                    <h3 className="font-semibold">Traceability Matrix</h3>
-                    <p className="text-sm text-muted-foreground">Maintain full traceability from requirements to tests for complete audit trails.</p>
+                    <h3 className="font-semibold text-sm">Traceability Matrix</h3>
+                    <p className="text-xs text-muted-foreground">Full traceability from requirements to tests.</p>
                 </div>
             </div>
-             <div className="flex items-start gap-4">
-                <TestTubeDiagonal className="h-8 w-8 text-accent-foreground mt-1" />
+             <div className="flex items-start gap-3">
+                <TestTubeDiagonal className="h-6 w-6 text-accent-foreground mt-0.5 flex-shrink-0" />
                 <div>
-                    <h3 className="font-semibold">Interactive Visualization</h3>
-                    <p className="text-sm text-muted-foreground">Visualize test coverage and compliance in an intuitive dashboard.</p>
+                    <h3 className="font-semibold text-sm">Interactive Visualization</h3>
+                    <p className="text-xs text-muted-foreground">Visualize test coverage and compliance intuitively.</p>
                 </div>
             </div>
-            <div className="flex items-start gap-4">
-                <Puzzle className="h-8 w-8 text-accent-foreground mt-1" />
+            <div className="flex items-start gap-3">
+                <Puzzle className="h-6 w-6 text-accent-foreground mt-0.5 flex-shrink-0" />
                 <div>
-                    <h3 className="font-semibold">ALM Integrations</h3>
-                    <p className="text-sm text-muted-foreground">Connect to Jira, Azure DevOps, and more to export test cases directly.</p>
+                    <h3 className="font-semibold text-sm">ALM Integrations</h3>
+                    <p className="text-xs text-muted-foreground">Connect to Jira, Azure DevOps, and more.</p>
                 </div>
             </div>
         </CardContent>
