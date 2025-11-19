@@ -3,26 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText, ShieldOff, ArrowRight, TestTubeDiagonal, Puzzle } from "lucide-react";
 import Link from 'next/link';
-import Image from "next/image";
 
 export default function DashboardPage() {
+  const tickerText = "Ensuring Quality in HealthTech — Leverage AI to meet rigorous standards and deliver safer medical software.";
+
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to HealthTestAI</h1>
-          <p className="text-muted-foreground">
-            Your intelligent partner for automated test case generation and compliance in healthcare.
-          </p>
-        </div>
-        <div className="flex-shrink-0">
-          <Image
-            src="/nasscom.png"
-            alt="Nasscom"
-            width={140}
-            height={140}
-            className="h-auto w-28"
-          />
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to HealthTestAI</h1>
+        <p className="text-muted-foreground">
+          Your intelligent partner for automated test case generation and compliance in healthcare.
+        </p>
+      </div>
+
+      <div className="overflow-hidden">
+        <div className="flex gap-12 whitespace-nowrap py-1 text-card-foreground animate-ticker">
+          {[...Array(2)].map((_, idx) => (
+            <span
+              key={idx}
+              className="text-sm font-medium uppercase tracking-wide text-primary"
+            >
+              {tickerText}
+            </span>
+          ))}
         </div>
       </div>
 
