@@ -3,15 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText, ShieldOff, ArrowRight, TestTubeDiagonal, Puzzle } from "lucide-react";
 import Link from 'next/link';
+import Image from "next/image";
 
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to HealthTestAI</h1>
-        <p className="text-muted-foreground">
-          Your intelligent partner for automated test case generation and compliance in healthcare.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight font-headline">Welcome to HealthTestAI</h1>
+          <p className="text-muted-foreground">
+            Your intelligent partner for automated test case generation and compliance in healthcare.
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <Image
+            src="/nasscom.png"
+            alt="Nasscom"
+            width={100}
+            height={100}
+            className="h-auto w-20"
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
