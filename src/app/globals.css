@@ -4,115 +4,115 @@
 
 @layer base {
   :root {
-    /* Base colors - Clean white with subtle gray accents */
+    /* Base colors - Clean background with navy blue accents */
     --background: 0 0% 98%;
-    --foreground: 210 4% 25%; /* Darker Blue Gray for text */
+    --foreground: 216 25% 24%; /* Dark Navy #2e3b4c */
 
-    /* Cards - Off White for subtle elevation */
-    --card: 60 4% 83%; /* Off White #d5d6d4 */
-    --card-foreground: 210 4% 25%;
+    /* Cards - Light blue-gray tint */
+    --card: 209 20% 95%;
+    --card-foreground: 216 25% 24%; /* Dark Navy #2e3b4c */
 
-    /* Popovers - White with Blue Gray text */
+    /* Popovers */
     --popover: 0 0% 100%;
-    --popover-foreground: 210 4% 29%; /* Blue Gray #454749 */
+    --popover-foreground: 216 25% 24%; /* Dark Navy #2e3b4c */
 
-    /* PRIMARY - BLUE GRAY as the star! */
-    --primary: 210 4% 29%; /* Blue Gray #454749 - PROMINENT! */
+    /* PRIMARY - #395879 taking prominence! */
+    --primary: 209 36% 35%; /* #395879 - PROMINENT! */
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Silver Gray for supporting actions */
-    --secondary: 100 2% 66%; /* Silver Gray #a8aba9 */
-    --secondary-foreground: 210 4% 25%;
+    /* Secondary - Medium gray-blue #556b7d */
+    --secondary: 209 19% 41%; /* #556b7d */
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted - Light Gray backgrounds */
-    --muted: 90 3% 79%; /* Light Gray #cbcdca */
-    --muted-foreground: 120 1% 55%; /* Gray #8c8d8d */
+    /* Muted - Light backgrounds */
+    --muted: 209 20% 90%;
+    --muted-foreground: 209 19% 41%; /* #556b7d */
 
-    /* Accent - Charcoal Gray for emphasis and hover */
-    --accent: 0 0% 43%; /* Charcoal Gray #6d6d6d */
+    /* Accent - Blue-gray #496378 */
+    --accent: 207 24% 38%; /* #496378 */
     --accent-foreground: 0 0% 100%;
 
-    /* Destructive - keeping a subtle red for warnings */
+    /* Destructive */
     --destructive: 0 50% 45%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders - Silver Gray for subtle definition */
-    --border: 100 2% 66%; /* Silver Gray #a8aba9 */
-    --input: 90 3% 79%; /* Light Gray #cbcdca */
-    --ring: 210 4% 29%; /* Blue Gray focus ring - PROMINENT! */
+    /* Borders - Light blue-gray */
+    --border: 209 20% 80%;
+    --input: 209 20% 85%;
+    --ring: 209 36% 35%; /* #395879 focus ring */
     --radius: 0.5rem;
 
-    /* Charts - Blue Gray dominant gradient */
-    --chart-1: 210 4% 29%; /* Blue Gray #454749 - PRIMARY! */
-    --chart-2: 0 0% 43%; /* Charcoal Gray #6d6d6d */
-    --chart-3: 240 1% 52%; /* Gray #838485 */
-    --chart-4: 100 2% 66%; /* Silver Gray #a8aba9 */
-    --chart-5: 90 3% 79%; /* Light Gray #cbcdca */
+    /* Charts - Blue gradient */
+    --chart-1: 209 36% 35%; /* #395879 */
+    --chart-2: 216 25% 24%; /* #2e3b4c */
+    --chart-3: 207 24% 38%; /* #496378 */
+    --chart-4: 209 19% 41%; /* #556b7d */
+    --chart-5: 209 20% 60%; /* Lighter variant */
 
-    /* Sidebar - Blue Gray themed */
-    --sidebar-background: 210 4% 29%; /* Blue Gray background - BOLD! */
-    --sidebar-foreground: 0 0% 98%; /* Light text on Blue Gray */
-    --sidebar-primary: 100 2% 66%; /* Silver Gray for contrast */
-    --sidebar-primary-foreground: 210 4% 29%; /* Blue Gray text */
-    --sidebar-accent: 210 4% 35%; /* Lighter Blue Gray for hover */
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 210 4% 35%; /* Blue Gray border */
-    --sidebar-ring: 100 2% 66%; /* Silver Gray ring */
+    /* Sidebar - Dark Navy #2e3b4c */
+    --sidebar-background: 216 25% 24%; /* #2e3b4c - BOLD! */
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 209 36% 45%; /* Lighter #395879 */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 209 36% 35%; /* #395879 */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 216 25% 30%;
+    --sidebar-ring: 209 36% 45%;
   }
   .dark {
-    /* Dark mode - Blue Gray foundation */
-    --background: 210 4% 10%; /* Very dark Blue Gray base */
-    --foreground: 90 3% 79%; /* Light Gray #cbcdca */
+    /* Dark mode - Dark Navy foundation */
+    --background: 216 25% 12%; /* Darker #2e3b4c variant */
+    --foreground: 209 20% 85%;
 
-    /* Cards - Slightly lighter Blue Gray */
-    --card: 210 4% 15%;
-    --card-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+    /* Cards */
+    --card: 216 25% 16%;
+    --card-foreground: 209 20% 85%;
 
     /* Popovers */
-    --popover: 210 4% 15%;
-    --popover-foreground: 90 3% 79%; /* Light Gray #cbcdca */
+    --popover: 216 25% 16%;
+    --popover-foreground: 209 20% 85%;
 
-    /* PRIMARY - Blue Gray stays prominent in dark mode */
-    --primary: 210 4% 40%; /* Lighter Blue Gray for visibility */
+    /* PRIMARY - Lighter blue for dark mode */
+    --primary: 209 36% 50%; /* Lighter #395879 */
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Silver Gray */
-    --secondary: 100 2% 66%; /* Silver Gray #a8aba9 */
-    --secondary-foreground: 210 4% 10%;
+    /* Secondary */
+    --secondary: 209 19% 50%; /* Lighter #556b7d */
+    --secondary-foreground: 0 0% 100%;
 
     /* Muted */
-    --muted: 210 4% 20%;
-    --muted-foreground: 120 1% 65%; /* Lighter Gray for dark mode */
+    --muted: 216 25% 20%;
+    --muted-foreground: 209 20% 65%;
 
-    /* Accent - Charcoal Gray */
-    --accent: 0 0% 50%; /* Lighter Charcoal for dark mode */
-    --accent-foreground: 0 0% 98%;
+    /* Accent */
+    --accent: 207 24% 45%; /* Lighter #496378 */
+    --accent-foreground: 0 0% 100%;
 
     /* Destructive */
     --destructive: 0 50% 45%;
     --destructive-foreground: 0 0% 98%;
 
     /* Borders */
-    --border: 210 4% 25%; /* Blue Gray borders */
-    --input: 210 4% 25%; /* Blue Gray inputs */
-    --ring: 210 4% 50%; /* Lighter Blue Gray focus ring */
+    --border: 216 25% 28%;
+    --input: 216 25% 28%;
+    --ring: 209 36% 50%;
 
-    /* Charts - Blue Gray centered palette */
-    --chart-1: 210 4% 50%; /* Lighter Blue Gray */
-    --chart-2: 100 2% 66%; /* Silver Gray #a8aba9 */
-    --chart-3: 0 0% 50%; /* Charcoal Gray */
-    --chart-4: 120 1% 65%; /* Gray */
-    --chart-5: 90 3% 79%; /* Light Gray #cbcdca */
+    /* Charts */
+    --chart-1: 209 36% 50%;
+    --chart-2: 207 24% 50%;
+    --chart-3: 209 19% 55%;
+    --chart-4: 216 25% 40%;
+    --chart-5: 209 20% 70%;
 
-    /* Sidebar - Deep Blue Gray */
-    --sidebar-background: 210 4% 12%; /* Dark Blue Gray */
-    --sidebar-foreground: 90 3% 79%; /* Light Gray #cbcdca */
-    --sidebar-primary: 210 4% 45%; /* Medium Blue Gray */
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 210 4% 20%; /* Darker Blue Gray accent */
-    --sidebar-accent-foreground: 90 3% 79%;
-    --sidebar-border: 210 4% 25%;
-    --sidebar-ring: 210 4% 50%;
+    /* Sidebar */
+    --sidebar-background: 216 25% 14%;
+    --sidebar-foreground: 209 20% 85%;
+    --sidebar-primary: 209 36% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 216 25% 22%;
+    --sidebar-accent-foreground: 209 20% 85%;
+    --sidebar-border: 216 25% 25%;
+    --sidebar-ring: 209 36% 50%;
   }
 }
 
