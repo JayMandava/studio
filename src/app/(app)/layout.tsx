@@ -1,5 +1,5 @@
 'use client';
-import { Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarInset, SidebarContent, SidebarTitle } from "@/components/ui/sidebar";
+import { Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarInset, SidebarContent, SidebarTitle, SidebarTrigger } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -44,6 +44,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
+        <header className="flex h-14 items-center gap-4 border-b px-4 md:hidden">
+          <SidebarTrigger />
+          <Logo className="text-foreground" />
+        </header>
         <main className="flex-1 p-4 md:p-6 overflow-x-hidden">
           {children}
         </main>
