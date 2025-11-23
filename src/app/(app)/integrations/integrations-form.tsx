@@ -232,15 +232,15 @@ export function IntegrationsForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
         <Tabs defaultValue="Jira" className="w-full">
-          <div className="flex items-center justify-between">
-            <TabsList>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <TabsList className="w-full sm:w-auto overflow-x-auto">
               {ALMTools.map(tool => (
-                <TabsTrigger key={tool} value={tool}>
+                <TabsTrigger key={tool} value={tool} className="text-xs sm:text-sm">
                   {tool}
                 </TabsTrigger>
               ))}
             </TabsList>
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto">
                 <Save className="mr-2 h-4 w-4" />
                 Save All
             </Button>
