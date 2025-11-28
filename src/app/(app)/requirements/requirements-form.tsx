@@ -6,6 +6,7 @@ import {
   parseRequirementsAndGenerateTestCases,
   type ParseRequirementsAndGenerateTestCasesOutput,
 } from "@/ai/flows/parse-requirements-and-generate-test-cases";
+import { performGapAnalysis, type PerformGapAnalysisOutput } from "@/ai/flows/perform-gap-analysis";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -87,10 +88,18 @@ const complianceStandards = [
   },
 ];
 
+type PastRunRecord = {
+  requirementId?: string;
+  requirementDescription?: string;
+  testCaseId?: string;
+  compliance: string[];
+};
+
 export function RequirementsForm() {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ParseRequirementsAndGenerateTestCasesOutput | null>(null);
+  const [gapAnalysis, setGapAnalysis] = useState<PerformGapAnalysisOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [showDomainAlert, setShowDomainAlert] = useState(false);
@@ -98,6 +107,7 @@ export function RequirementsForm() {
   const [activeIntegrations, setActiveIntegrations] = useState<any[]>([]);
   const [isExportingToJira, setIsExportingToJira] = useState(false);
   const [jiraExportProgress, setJiraExportProgress] = useState({ current: 0, total: 0 });
+  const [pastRunFiles, setPastRunFiles] = useState<{ fileName: string; records: PastRunRecord[] }[]>([]);
 
   useEffect(() => {
     try {
@@ -111,15 +121,138 @@ export function RequirementsForm() {
     }
   }, []);
 
+  const complianceLabels = complianceStandards.map((standard) => standard.label);
+
+  const isRequirementFile = (file: File) => {
+    const name = file.name.toLowerCase();
+    const type = file.type.toLowerCase();
+    return (
+      name.endsWith('.pdf') ||
+      name.endsWith('.xml') ||
+      name.endsWith('.md') ||
+      type.includes('pdf') ||
+      type.includes('xml') ||
+      type.includes('markdown')
+    );
+  };
+
+  const readFileAsDataURL = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file.'));
+      reader.readAsDataURL(file);
+    });
+
+  const readFileAsText = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file.'));
+      reader.readAsText(file);
+    });
+
+  const normalizeRequirementDataUri = (dataUri: string, file: File) => {
+    const mimeType = file.type;
+    const fileName = file.name;
+
+    if ((mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.md')) {
+      return dataUri.replace(/data:application\/octet-stream;|data:;/, 'data:text/markdown;');
+    } else if (
+      mimeType === 'application/xml' ||
+      mimeType === 'text/xml' ||
+      (mimeType === 'application/octet-stream' && fileName.endsWith('.xml')) ||
+      (mimeType === '' && fileName.endsWith('.xml'))
+    ) {
+      return dataUri.replace(/data:application\/xml;|data:text\/xml;|data:application\/octet-stream;|data:;/, 'data:text/plain;');
+    }
+
+    return dataUri;
+  };
+
+  const parseCsvPastRuns = (csvText: string): PastRunRecord[] => {
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
+    if (lines.length < 2) return [];
+    const dataLines = lines.slice(1);
+    return dataLines.map(line => {
+      const cells = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(cell => cell.replace(/^\"|\"$/g, '').trim());
+      const requirementId = cells[0] || undefined;
+      const requirementDescription = cells[1] || undefined;
+      const testCaseId = cells[2] || undefined;
+      const complianceList = cells[4] ? cells[4].split(',').map(c => c.trim()).filter(Boolean) : [];
+      return {
+        requirementId,
+        requirementDescription,
+        testCaseId,
+        compliance: complianceList,
+      };
+    });
+  };
+
+  const buildFallbackGapAnalysis = (
+    requirements: ParseRequirementsAndGenerateTestCasesOutput['requirementTestCases'] | undefined,
+    pastRuns: PastRunRecord[]
+  ): PerformGapAnalysisOutput => {
+    if (!requirements) return { overallSummary: 'No requirements detected.', gapFindings: [] };
+    const pastStandards = new Set(pastRuns.flatMap(run => run.compliance.map(c => c.toLowerCase())));
+    const targetStandards = complianceLabels;
+
+    const gapFindings = requirements.map((req, index) => {
+      const currentStandards = new Set(
+        req.testCases.flatMap(tc => tc.compliance.map(c => c.toLowerCase()))
+      );
+      const missingStandards = targetStandards.filter(
+        standard => !currentStandards.has(standard.toLowerCase())
+      );
+      const regressionStandards = Array.from(pastStandards).filter(
+        standard => !currentStandards.has(standard)
+      );
+
+      const isCompliant = missingStandards.length === 0;
+      const complianceStatus = isCompliant
+        ? 'Aligned with target standards.'
+        : `Missing coverage for: ${missingStandards.join(', ')}`;
+
+      return {
+        requirementSummary: req.requirement || `Requirement #${index + 1}`,
+        complianceStatus,
+        missingStandards,
+        regressionStandards,
+        recommendedActions:
+          missingStandards.length === 0 && regressionStandards.length === 0
+            ? 'Keep existing coverage; no gaps detected.'
+            : 'Add or update test cases to cover missing/regressed standards; update traceability.',
+        notes: regressionStandards.length > 0 ? 'Past runs included standards not present in current test cases.' : undefined,
+      };
+    });
+
+    const anyMissing = gapFindings.some(f => f.missingStandards.length > 0);
+    const anyRegression = gapFindings.some(f => f.regressionStandards.length > 0);
+    const overallSummary = anyMissing
+      ? 'Some requirements are missing target standard coverage.'
+      : 'All requirements align with target standards.';
+    const summaryWithRegression = anyRegression
+      ? `${overallSummary} Regressions vs past runs detected.`
+      : overallSummary;
+
+    return {
+      overallSummary: summaryWithRegression,
+      gapFindings,
+    };
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length > 0) {
+      setFiles((prev) => [...prev, ...selectedFiles]);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
   
-  const handleRemoveFile = () => {
-    setFile(null);
+  const handleRemoveFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
     if(fileInputRef.current) {
         fileInputRef.current.value = "";
     }
@@ -127,11 +260,12 @@ export function RequirementsForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) {
+    const requirementFile = files.find(isRequirementFile);
+    if (!requirementFile) {
       toast({
         variant: "destructive",
-        title: "No file selected",
-        description: "Please select a requirements document to upload.",
+        title: "No requirements file",
+        description: "Please upload a requirements document (PDF, XML, or Markdown).",
       });
       return;
     }
@@ -139,65 +273,68 @@ export function RequirementsForm() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setGapAnalysis(null);
+    setPastRunFiles([]);
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
+    try {
+      const requirementDataUri = normalizeRequirementDataUri(
+        await readFileAsDataURL(requirementFile),
+        requirementFile
+      );
 
-    reader.onload = async () => {
-      try {
-        let dataUri = reader.result as string;
-        
-        const mimeType = file.type;
-        const fileName = file.name;
+      const pastCsvFiles = files.filter(f => f.name.toLowerCase().endsWith('.csv'));
+      const pastRunData = await Promise.all(
+        pastCsvFiles.map(async file => {
+          const text = await readFileAsText(file);
+          return { fileName: file.name, records: parseCsvPastRuns(text) };
+        })
+      );
+      setPastRunFiles(pastRunData);
 
-        if ( (mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.md')) {
-            dataUri = dataUri.replace(/data:application\/octet-stream;|data:;/,'data:text/markdown;');
-        } else if ( (mimeType === 'application/xml' || mimeType === 'text/xml' || ((mimeType === 'application/octet-stream' || mimeType === '') && fileName.endsWith('.xml'))) ) {
-            dataUri = dataUri.replace(/data:application\/xml;|data:text\/xml;|data:application\/octet-stream;|data:;/, 'data:text/plain;');
-        }
+      const response = await parseRequirementsAndGenerateTestCases({
+        documentDataUri: requirementDataUri,
+      });
 
-        const response = await parseRequirementsAndGenerateTestCases({
-          documentDataUri: dataUri,
-        });
+      if (!response.isHealthcareDomain) {
+        setShowDomainAlert(true);
+      } else {
+        setResult(response);
+        if (response.requirementTestCases) {
+          const totalTestCases = response.requirementTestCases.reduce((acc, curr) => acc + curr.testCases.length, 0);
+          toast({
+              title: "Success!",
+              description: `Generated ${totalTestCases} test cases across ${response.requirementTestCases.length} requirements.`,
+          });
 
-        if (!response.isHealthcareDomain) {
-          setShowDomainAlert(true);
-        } else {
-          setResult(response);
-          if (response.requirementTestCases) {
-            const totalTestCases = response.requirementTestCases.reduce((acc, curr) => acc + curr.testCases.length, 0);
-            toast({
-                title: "Success!",
-                description: `Generated ${totalTestCases} test cases across ${response.requirementTestCases.length} requirements.`,
+          try {
+            const gapResult = await performGapAnalysis({
+              requirementTestCases: response.requirementTestCases,
+              pastRuns: pastRunData.flatMap(p => p.records),
+              targetStandards: complianceLabels,
             });
+            setGapAnalysis(gapResult);
+          } catch (analysisError) {
+            console.warn('Gap analysis flow failed, using fallback.', analysisError);
+            setGapAnalysis(buildFallbackGapAnalysis(response.requirementTestCases, pastRunData.flatMap(p => p.records)));
           }
         }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
-        setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: "Generation Failed",
-          description: errorMessage,
-        });
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    reader.onerror = () => {
-        setError("Failed to read the file.");
-        toast({
-          variant: "destructive",
-          title: "File Read Error",
-          description: "There was an error processing your file.",
-        });
-        setLoading(false);
-    };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+      setError(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: errorMessage,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleExport = (format: 'csv' | 'pdf') => {
     if (!result || !result.requirementTestCases) return;
+    const primaryFileName = files.find(isRequirementFile)?.name || 'requirements';
   
     if (format === 'csv') {
       const header = 'Requirement ID,Requirement Description,Test Case ID,Test Case Description,Compliance Standards\n';
@@ -211,7 +348,7 @@ export function RequirementsForm() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'requirements-test-cases.csv';
+      a.download = `${primaryFileName.replace(/\.[^/.]+$/, '') || 'requirements'}-test-cases.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -263,12 +400,53 @@ export function RequirementsForm() {
       const url = URL.createObjectURL(pdfOutput);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'requirements-test-cases.pdf';
+      a.download = `${primaryFileName.replace(/\.[^/.]+$/, '') || 'requirements'}-test-cases.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
+  };
+
+  const handleGapExport = () => {
+    if (!gapAnalysis || !gapAnalysis.gapFindings || !result?.requirementTestCases) return;
+
+    const header = 'Compliance Code,Requirement,TCs Executed Earlier,Status\n';
+    const pastRuns = pastRunFiles.flatMap(p => p.records);
+    const pastStandards = new Set(
+      pastRuns.flatMap(run => run.compliance.map(c => c.toLowerCase()))
+    );
+
+    const rows: string[] = [];
+
+    result.requirementTestCases.forEach(req => {
+      const currentStandards = new Set(
+        req.testCases.flatMap(tc => tc.compliance.map(c => c.toLowerCase()))
+      );
+
+      complianceLabels.forEach(code => {
+        const codeLower = code.toLowerCase();
+        const executedEarlier = pastStandards.has(codeLower) ? 'Done' : 'Not Done';
+        const status = currentStandards.has(codeLower) ? 'Pass' : 'Fail'; // No info -> Fail
+
+        rows.push([
+          `"${code}"`,
+          `"${(req.requirement || '').replace(/"/g, '""')}"`,
+          executedEarlier,
+          status,
+        ].join(','));
+      });
+    });
+
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'gap-analysis.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
   
   const handleAlmExport = async (tool: string) => {
@@ -280,6 +458,7 @@ export function RequirementsForm() {
       });
       return;
     }
+    const requirementFile = files.find(isRequirementFile) || null;
 
     // Only handle JIRA for now
     if (tool.toLowerCase() !== 'jira') {
@@ -325,14 +504,14 @@ export function RequirementsForm() {
           projectKey: jiraIntegration.projectKey,
         },
         result.requirementTestCases,
-        file?.name || 'Requirements',
+        requirementFile?.name || 'Requirements',
         (current, total, key) => {
           setJiraExportProgress({ current, total });
           if (key) {
             console.log(`Created JIRA story: ${key}`);
           }
         },
-        file || undefined
+        requirementFile || undefined
       );
 
       if (exportResult.success > 0) {
@@ -362,19 +541,20 @@ export function RequirementsForm() {
 
   const handleSaveToNotebook = () => {
     if (!result) return;
+    const primaryFileName = files.find(isRequirementFile)?.name || 'Untitled';
     try {
         const savedEntries: SavedNotebookEntry[] = JSON.parse(localStorage.getItem('notebookEntries') || '[]');
         const newEntry: SavedNotebookEntry = {
             id: new Date().toISOString(),
             date: new Date().toISOString(),
             data: result,
-            fileName: file?.name || 'Untitled',
+            fileName: primaryFileName,
         };
         savedEntries.unshift(newEntry);
         localStorage.setItem('notebookEntries', JSON.stringify(savedEntries));
         toast({
             title: "Saved to Notebook",
-            description: `The generated test cases for ${file?.name} have been saved.`,
+            description: `The generated test cases for ${primaryFileName} have been saved.`,
         });
     } catch (e) {
         console.error("Failed to save to notebook:", e);
@@ -445,8 +625,9 @@ export function RequirementsForm() {
                     id="requirements-file"
                     ref={fileInputRef}
                     type="file"
+                    multiple
                     onChange={handleFileChange}
-                    accept=".pdf,.xml,.md,application/pdf,text/xml,text/markdown"
+                    accept=".pdf,.xml,.md,.csv,application/pdf,text/xml,text/markdown,text/csv,application/csv"
                     className="hidden"
                   />
                   <Button
@@ -456,25 +637,35 @@ export function RequirementsForm() {
                     className="w-full"
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    Choose File
+                    Choose Files
                   </Button>
                 </div>
-                {file && (
-                    <div className="flex items-center justify-between rounded-md border border-input bg-background p-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                            <FileText className="h-4 w-4 flex-shrink-0"/>
-                            <span className="truncate">{file.name}</span>
+                {files.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      {files.map((selectedFile, index) => (
+                        <div key={`${selectedFile.name}-${index}`} className="flex items-center justify-between rounded-md border border-input bg-background p-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <FileText className="h-4 w-4 flex-shrink-0"/>
+                                <span className="truncate">{selectedFile.name}</span>
+                                <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                                  {selectedFile.name.toLowerCase().endsWith('.csv') ? 'Past run' : 'Requirement'}
+                                </span>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => handleRemoveFile(index)}>
+                               <X className="h-4 w-4"/>
+                               <span className="sr-only">Remove file</span>
+                            </Button>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={handleRemoveFile}>
-                           <X className="h-4 w-4"/>
-                           <span className="sr-only">Remove file</span>
-                        </Button>
+                      ))}
                     </div>
                 )}
+                <p className="text-xs text-muted-foreground">
+                  You can upload multiple files, including past test run CSVs, to enrich the gap analysis.
+                </p>
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" disabled={loading || !file}>
+              <Button type="submit" disabled={loading || !files.some(isRequirementFile)}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -574,7 +765,7 @@ export function RequirementsForm() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                  <Accordion type="multiple" className="w-full" defaultValue={result.requirementTestCases.map((_, index) => `item-${index}`)}>
+                  <Accordion type="multiple" className="w-full" defaultValue={[]}>
                     {result.requirementTestCases.map((item, index) => (
                       <AccordionItem key={index} value={`item-${index}`}>
                           <AccordionTrigger className="text-left hover:no-underline">
@@ -608,6 +799,92 @@ export function RequirementsForm() {
                     ))}
                   </Accordion>
               </CardContent>
+          </Card>
+        )}
+
+        {gapAnalysis && gapAnalysis.gapFindings && gapAnalysis.gapFindings.length > 0 && (
+          <Card>
+            <CardHeader className="flex-row items-start justify-between gap-4">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-primary">
+                  <AlertTriangle className="h-5 w-5" /> Gap Analysis
+                </CardTitle>
+                <CardDescription>
+                  {gapAnalysis.overallSummary}
+                  {pastRunFiles.length > 0 && (
+                    <span className="ml-2 text-xs text-muted-foreground">(Past runs used: {pastRunFiles.length})</span>
+                  )}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={handleGapExport}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export as CSV
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="multiple" className="w-full" defaultValue={[]}>
+                {gapAnalysis.gapFindings.map((finding, index) => (
+                  <AccordionItem key={index} value={`gap-${index}`}>
+                    <AccordionTrigger className="text-left hover:no-underline">
+                      <div className="flex flex-col gap-1.5 text-left">
+                        <span className="font-semibold text-base">Requirement #{index + 1}</span>
+                        <p className="font-normal text-muted-foreground line-clamp-2">{finding.requirementSummary}</p>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="pl-4 border-l-2 border-primary ml-2 space-y-3">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-semibold">Status</span>
+                          <p className="text-sm text-foreground">{finding.complianceStatus}</p>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div className="space-y-1">
+                            <span className="text-sm font-semibold">Missing Standards</span>
+                            {finding.missingStandards.length > 0 ? (
+                              <div className="flex flex-wrap gap-2">
+                                {finding.missingStandards.map(standard => (
+                                  <Badge key={standard} variant="outline" className="font-normal">
+                                    {standard}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">None</p>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-sm font-semibold">Regressions vs Past Runs</span>
+                            {finding.regressionStandards.length > 0 ? (
+                              <div className="flex flex-wrap gap-2">
+                                {finding.regressionStandards.map(standard => (
+                                  <Badge key={standard} variant="destructive" className="font-normal">
+                                    {standard}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">None detected</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-sm font-semibold">Recommended Actions</span>
+                          <p className="text-sm text-foreground">{finding.recommendedActions}</p>
+                        </div>
+                        {finding.notes && (
+                          <div className="space-y-1">
+                            <span className="text-sm font-semibold">Notes</span>
+                            <p className="text-sm text-muted-foreground">{finding.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
           </Card>
         )}
       </div>
