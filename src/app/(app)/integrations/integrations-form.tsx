@@ -111,29 +111,30 @@ const IntegrationCard = ({
     try {
       // Test JIRA connection
       if (tool === 'Jira') {
-        const authString = `${values.username}:${values.apiToken}`;
-        const encodedAuth = btoa(authString);
-
-        const response = await fetch(`${values.url}/rest/api/3/myself`, {
-          method: 'GET',
+        const response = await fetch('/api/jira/test-connection', {
+          method: 'POST',
           headers: {
-            'Authorization': `Basic ${encodedAuth}`,
-            'Accept': 'application/json',
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            url: values.url,
+            username: values.username,
+            apiToken: values.apiToken,
+          }),
         });
 
-        if (response.ok) {
-          const userData = await response.json();
+        const data = await response.json();
+
+        if (response.ok && data.success) {
           toast({
             title: 'Connection Successful',
-            description: `Connected to JIRA as ${userData.displayName || values.username}`,
+            description: `Connected to JIRA as ${data.user.displayName || values.username}`,
           });
         } else {
-          const errorText = await response.text().catch(() => 'Unknown error');
           toast({
             variant: 'destructive',
             title: 'Connection Failed',
-            description: `HTTP ${response.status}: Please check your credentials.`,
+            description: data.error || 'Please check your credentials.',
           });
         }
       } else {

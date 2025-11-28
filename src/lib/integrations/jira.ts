@@ -36,10 +36,6 @@ export async function createJiraStory(
   requirementIndex: number
 ): Promise<JiraStoryResponse> {
   try {
-    // Create Basic Auth header
-    const authString = `${config.username}:${config.apiToken}`;
-    const encodedAuth = btoa(authString);
-
     // Format the description with test cases
     const description = formatJiraDescription(requirement);
 
@@ -68,27 +64,30 @@ export async function createJiraStory(
       },
     };
 
-    // Make API call to create issue
-    const response = await fetch(`${config.url}/rest/api/3/issue`, {
+    // Make API call to our server-side proxy
+    const response = await fetch('/api/jira/create-issue', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${encodedAuth}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        url: config.url,
+        username: config.username,
+        apiToken: config.apiToken,
+        payload: payload,
+      }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('JIRA API Error:', errorData);
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      console.error('JIRA API Error:', data);
       return {
         success: false,
-        error: errorData.errorMessages?.[0] || `HTTP ${response.status}: ${response.statusText}`,
+        error: data.error || `HTTP ${response.status}: ${response.statusText}`,
       };
     }
 
-    const data = await response.json();
     return {
       success: true,
       key: data.key,
