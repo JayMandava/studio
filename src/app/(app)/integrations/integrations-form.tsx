@@ -33,9 +33,11 @@ type ALMTool = typeof ALMTools[number];
 
 const integrationSchema = z.object({
     tool: z.enum(ALMTools),
-    url: z.string().url({ message: 'Please enter a valid URL.' }),
-    username: z.string().min(1, { message: 'Username is required.' }),
-    apiToken: z.string().min(1, { message: 'API Token is required.' }),
+    url: z.string().refine((val) => !val || z.string().url().safeParse(val).success, {
+        message: 'Please enter a valid URL or leave empty.',
+    }),
+    username: z.string(),
+    apiToken: z.string(),
     projectKey: z.string().optional(),
     isActive: z.boolean().default(false),
 });
@@ -187,7 +189,15 @@ const IntegrationCard = ({
             <FormItem className="mb-4">
               <FormLabel>Instance URL</FormLabel>
               <FormControl>
-                <Input placeholder="https://your-instance.com" {...field} value={field.value || ''} />
+                <Input
+                  placeholder="https://your-instance.com"
+                  {...field}
+                  value={field.value || ''}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onSave();
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -200,7 +210,15 @@ const IntegrationCard = ({
             <FormItem className="mb-4">
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="your.username" {...field} value={field.value || ''} />
+                <Input
+                  placeholder="your.username"
+                  {...field}
+                  value={field.value || ''}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onSave();
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -213,7 +231,16 @@ const IntegrationCard = ({
             <FormItem className="mb-4">
               <FormLabel>API Token / Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••••••" {...field} value={field.value || ''} />
+                <Input
+                  type="password"
+                  placeholder="••••••••••••"
+                  {...field}
+                  value={field.value || ''}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onSave();
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -227,7 +254,15 @@ const IntegrationCard = ({
               <FormItem className="mb-6">
                 <FormLabel>Project Key (Required for JIRA)</FormLabel>
                 <FormControl>
-                  <Input placeholder="PROJ" {...field} value={field.value || ''} />
+                  <Input
+                    placeholder="PROJ"
+                    {...field}
+                    value={field.value || ''}
+                    onBlur={(e) => {
+                      field.onBlur();
+                      onSave();
+                    }}
+                  />
                 </FormControl>
                 <p className="text-xs text-muted-foreground mt-1">
                   Find this in your JIRA URL: https://yourinstance.atlassian.net/browse/<strong>PROJ</strong>-123
@@ -315,6 +350,7 @@ export function IntegrationsForm() {
   }, [form]);
 
   const handleFormSubmit = (data: IntegrationFormValues) => {
+    console.log('Form submit triggered with data:', data);
     try {
       localStorage.setItem('almIntegrations', JSON.stringify(data.integrations));
       toast({
@@ -333,8 +369,10 @@ export function IntegrationsForm() {
 
   const saveToLocalStorage = () => {
     const currentData = form.getValues();
+    console.log('Saving to localStorage:', currentData);
     try {
       localStorage.setItem('almIntegrations', JSON.stringify(currentData.integrations));
+      console.log('Saved successfully');
       toast({
         title: 'Settings Saved',
         description: 'Your integration settings have been saved.',
@@ -351,7 +389,14 @@ export function IntegrationsForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleFormSubmit, (errors) => {
+        console.log('Form validation errors:', errors);
+        toast({
+          variant: 'destructive',
+          title: 'Validation Error',
+          description: 'Please check all fields and try again.',
+        });
+      })} className="space-y-8">
         <Tabs defaultValue="Jira" className="w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <TabsList className="w-full sm:w-auto overflow-x-auto">
@@ -361,7 +406,11 @@ export function IntegrationsForm() {
                 </TabsTrigger>
               ))}
             </TabsList>
-            <Button type="submit" className="w-full sm:w-auto">
+            <Button type="submit" className="w-full sm:w-auto" onClick={() => {
+              console.log('Save All clicked');
+              console.log('Current form values:', form.getValues());
+              console.log('Form errors:', form.formState.errors);
+            }}>
                 <Save className="mr-2 h-4 w-4" />
                 Save All
             </Button>
