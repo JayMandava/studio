@@ -6,6 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -32,9 +33,12 @@ type ALMTool = typeof ALMTools[number];
 
 const integrationSchema = z.object({
     tool: z.enum(ALMTools),
-    url: z.string().url({ message: 'Please enter a valid URL.' }),
-    username: z.string().min(1, { message: 'Username is required.' }),
-    apiToken: z.string().min(1, { message: 'API Token is required.' }),
+    url: z.string().refine((val) => !val || z.string().url().safeParse(val).success, {
+        message: 'Please enter a valid URL or leave empty.',
+    }),
+    username: z.string(),
+    apiToken: z.string(),
+    projectKey: z.string().optional(),
     isActive: z.boolean().default(false),
 });
 
@@ -47,12 +51,15 @@ type IntegrationFormValues = z.infer<typeof formSchema>;
 const IntegrationCard = ({
   tool,
   form,
+  onSave,
 }: {
   tool: ALMTool;
   form: any;
+  onSave: () => void;
 }) => {
   const { toast } = useToast();
-  const { fields, append, remove, update } = useFieldArray({
+  const [isTesting, setIsTesting] = useState(false);
+  const { fields } = useFieldArray({
     control: form.control,
     name: 'integrations',
     keyName: 'key',
@@ -61,22 +68,10 @@ const IntegrationCard = ({
   const toolIndex = fields.findIndex((field: any) => field.tool === tool);
   const currentConfig = toolIndex > -1 ? fields[toolIndex] : null;
 
-  const onSubmit = (data: z.infer<typeof integrationSchema>) => {
-    if (toolIndex > -1) {
-      update(toolIndex, { ...data, tool });
-    } else {
-      append({ ...data, tool });
-    }
-    toast({
-      title: 'Configuration Saved',
-      description: `Your settings for ${tool} have been successfully saved.`,
-    });
-  };
-
   const handleActiveToggle = (checked: boolean) => {
     const currentValues = form.getValues(`integrations.${toolIndex}`);
     form.setValue(`integrations.${toolIndex}`, {...currentValues, isActive: checked });
-    
+
     // Deactivate all other integrations
     fields.forEach((field: any, index: number) => {
         if(field.tool !== tool) {
@@ -85,7 +80,81 @@ const IntegrationCard = ({
         }
     });
 
-    form.handleSubmit(onSubmit)();
+    // Save to localStorage (silently)
+    onSave(true);
+  };
+
+  const handleTestConnection = async () => {
+    if (!currentConfig) return;
+
+    const values = form.getValues(`integrations.${toolIndex}`);
+
+    // Validate required fields
+    if (!values.url || !values.username || !values.apiToken) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Information',
+        description: 'Please fill in all required fields before testing.',
+      });
+      return;
+    }
+
+    if (tool === 'Jira' && !values.projectKey) {
+      toast({
+        variant: 'destructive',
+        title: 'Project Key Required',
+        description: 'Please enter your JIRA project key before testing.',
+      });
+      return;
+    }
+
+    setIsTesting(true);
+
+    try {
+      // Test JIRA connection
+      if (tool === 'Jira') {
+        const response = await fetch('/api/jira/test-connection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: values.url,
+            username: values.username,
+            apiToken: values.apiToken,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          toast({
+            title: 'Connection Successful',
+            description: `Connected to JIRA as ${data.user.displayName || values.username}`,
+          });
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Connection Failed',
+            description: data.error || 'Please check your credentials.',
+          });
+        }
+      } else {
+        // Placeholder for other tools
+        toast({
+          title: 'Test Connection',
+          description: `Connection testing for ${tool} is coming soon.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Connection Error',
+        description: error instanceof Error ? error.message : 'Failed to connect to the server.',
+      });
+    } finally {
+      setIsTesting(false);
+    }
   }
 
   return (
@@ -120,7 +189,15 @@ const IntegrationCard = ({
             <FormItem className="mb-4">
               <FormLabel>Instance URL</FormLabel>
               <FormControl>
-                <Input placeholder="https://your-instance.com" {...field} value={field.value || ''} />
+                <Input
+                  placeholder="https://your-instance.com"
+                  {...field}
+                  value={field.value || ''}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onSave();
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -133,7 +210,15 @@ const IntegrationCard = ({
             <FormItem className="mb-4">
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="your.username" {...field} value={field.value || ''} />
+                <Input
+                  placeholder="your.username"
+                  {...field}
+                  value={field.value || ''}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onSave();
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -143,15 +228,68 @@ const IntegrationCard = ({
           control={form.control}
           name={`integrations.${toolIndex}.apiToken`}
           render={({ field }) => (
-            <FormItem className="mb-6">
+            <FormItem className="mb-4">
               <FormLabel>API Token / Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••••••" {...field} value={field.value || ''} />
+                <Input
+                  type="password"
+                  placeholder="••••••••••••"
+                  {...field}
+                  value={field.value || ''}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onSave();
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        {tool === 'Jira' && (
+          <FormField
+            control={form.control}
+            name={`integrations.${toolIndex}.projectKey`}
+            render={({ field }) => (
+              <FormItem className="mb-6">
+                <FormLabel>Project Key (Required for JIRA)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="PROJ"
+                    {...field}
+                    value={field.value || ''}
+                    onBlur={(e) => {
+                      field.onBlur();
+                      onSave();
+                    }}
+                  />
+                </FormControl>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Find this in your JIRA URL: https://yourinstance.atlassian.net/browse/<strong>PROJ</strong>-123
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        <div className="flex gap-2 mb-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleTestConnection}
+            disabled={!currentConfig || isTesting}
+            className="flex-1"
+          >
+            {isTesting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Testing...
+              </>
+            ) : (
+              'Test Connection'
+            )}
+          </Button>
+        </div>
         <div className="flex items-center justify-between rounded-lg border p-3">
              <div className="space-y-0.5">
                 <FormLabel>Set as Active Connection</FormLabel>
@@ -165,7 +303,7 @@ const IntegrationCard = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                       <Switch 
+                       <Switch
                          checked={field.value}
                          onCheckedChange={handleActiveToggle}
                          disabled={!currentConfig}
@@ -193,31 +331,50 @@ export function IntegrationsForm() {
 
   useEffect(() => {
     try {
+      console.log('Checking localStorage...');
+      console.log('All localStorage keys:', Object.keys(localStorage));
       const savedIntegrations = localStorage.getItem('almIntegrations');
+      console.log('Loading from localStorage (almIntegrations):', savedIntegrations);
+
       if (savedIntegrations) {
         const parsed = JSON.parse(savedIntegrations);
+        console.log('Parsed integrations:', parsed);
+
         // Ensure all tools are present in the form state
         const allToolsData = ALMTools.map(tool => {
             const existing = parsed.find((p: any) => p.tool === tool);
-            return existing || { tool, url: '', username: '', apiToken: '', isActive: false };
+            return existing || { tool, url: '', username: '', apiToken: '', projectKey: '', isActive: false };
         });
+
+        console.log('Setting form data:', allToolsData);
         form.reset({ integrations: allToolsData });
       } else {
+        console.log('No saved integrations, initializing empty');
         // Initialize with all tools
-        form.reset({ integrations: ALMTools.map(tool => ({ tool, url: '', username: '', apiToken: '', isActive: false })) });
+        form.reset({ integrations: ALMTools.map(tool => ({ tool, url: '', username: '', apiToken: '', projectKey: '', isActive: false })) });
       }
     } catch (e) {
       console.error('Failed to load integrations from localStorage:', e);
     }
-  }, [form]);
+  }, []);
 
   const handleFormSubmit = (data: IntegrationFormValues) => {
+    console.log('Form submit triggered with data:', data);
+    saveToLocalStorage(false); // Show toast on Save All
+  };
+
+  const saveToLocalStorage = (silent = true) => {
+    const currentData = form.getValues();
+    console.log('Saving to localStorage:', currentData);
     try {
-      localStorage.setItem('almIntegrations', JSON.stringify(data.integrations));
-      toast({
-        title: 'All Configurations Saved',
-        description: 'Your settings for all ALM tools have been saved.',
-      });
+      localStorage.setItem('almIntegrations', JSON.stringify(currentData.integrations));
+      console.log('Saved successfully');
+      if (!silent) {
+        toast({
+          title: 'Settings Saved',
+          description: 'Your integration settings have been saved.',
+        });
+      }
     } catch (e) {
       console.error('Failed to save to localStorage:', e);
       toast({
@@ -230,7 +387,14 @@ export function IntegrationsForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleFormSubmit, (errors) => {
+        console.log('Form validation errors:', errors);
+        toast({
+          variant: 'destructive',
+          title: 'Validation Error',
+          description: 'Please check all fields and try again.',
+        });
+      })} className="space-y-8">
         <Tabs defaultValue="Jira" className="w-full">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <TabsList className="w-full sm:w-auto overflow-x-auto">
@@ -240,14 +404,18 @@ export function IntegrationsForm() {
                 </TabsTrigger>
               ))}
             </TabsList>
-            <Button type="submit" className="w-full sm:w-auto">
+            <Button type="submit" className="w-full sm:w-auto" onClick={() => {
+              console.log('Save All clicked');
+              console.log('Current form values:', form.getValues());
+              console.log('Form errors:', form.formState.errors);
+            }}>
                 <Save className="mr-2 h-4 w-4" />
                 Save All
             </Button>
           </div>
           {ALMTools.map(tool => (
             <TabsContent key={tool} value={tool} className="mt-6">
-              <IntegrationCard tool={tool} form={form} />
+              <IntegrationCard tool={tool} form={form} onSave={() => saveToLocalStorage(true)} />
             </TabsContent>
           ))}
         </Tabs>
