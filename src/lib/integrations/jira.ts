@@ -314,43 +314,6 @@ function formatBDDTestCase(testCase: TestCase, index: number): any {
 }
 
 /**
- * Creates a "relates to" link between two JIRA issues
- */
-async function createIssueLink(
-  config: JiraConfig,
-  subtaskKey: string,
-  parentKey: string
-): Promise<boolean> {
-  try {
-    const response = await fetch('/api/jira/link-issues', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: config.url,
-        username: config.username,
-        apiToken: config.apiToken,
-        linkType: 'Relates',
-        inwardIssue: subtaskKey,
-        outwardIssue: parentKey,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error(`Failed to link ${subtaskKey} to ${parentKey}`);
-      return false;
-    }
-
-    console.log(`Linked ${subtaskKey} -> ${parentKey} (relates to)`);
-    return true;
-  } catch (error) {
-    console.error('Error linking issues:', error);
-    return false;
-  }
-}
-
-/**
  * Creates subtasks for each test case
  */
 async function createSubtasksForTestCases(
@@ -407,10 +370,6 @@ async function createSubtasksForTestCases(
         });
       } else {
         console.log(`Created subtask: ${data.key}`);
-
-        // Create "relates to" link for traceability
-        await createIssueLink(config, data.key, parentKey);
-
         results.push({
           success: true,
           key: data.key,
