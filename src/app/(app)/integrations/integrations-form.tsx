@@ -35,6 +35,7 @@ const integrationSchema = z.object({
     url: z.string().url({ message: 'Please enter a valid URL.' }),
     username: z.string().min(1, { message: 'Username is required.' }),
     apiToken: z.string().min(1, { message: 'API Token is required.' }),
+    projectKey: z.string().optional(),
     isActive: z.boolean().default(false),
 });
 
@@ -143,7 +144,7 @@ const IntegrationCard = ({
           control={form.control}
           name={`integrations.${toolIndex}.apiToken`}
           render={({ field }) => (
-            <FormItem className="mb-6">
+            <FormItem className="mb-4">
               <FormLabel>API Token / Password</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••••••" {...field} value={field.value || ''} />
@@ -152,6 +153,24 @@ const IntegrationCard = ({
             </FormItem>
           )}
         />
+        {tool === 'Jira' && (
+          <FormField
+            control={form.control}
+            name={`integrations.${toolIndex}.projectKey`}
+            render={({ field }) => (
+              <FormItem className="mb-6">
+                <FormLabel>Project Key (Required for JIRA)</FormLabel>
+                <FormControl>
+                  <Input placeholder="PROJ" {...field} value={field.value || ''} />
+                </FormControl>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Find this in your JIRA URL: https://yourinstance.atlassian.net/browse/<strong>PROJ</strong>-123
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <div className="flex items-center justify-between rounded-lg border p-3">
              <div className="space-y-0.5">
                 <FormLabel>Set as Active Connection</FormLabel>
@@ -199,12 +218,12 @@ export function IntegrationsForm() {
         // Ensure all tools are present in the form state
         const allToolsData = ALMTools.map(tool => {
             const existing = parsed.find((p: any) => p.tool === tool);
-            return existing || { tool, url: '', username: '', apiToken: '', isActive: false };
+            return existing || { tool, url: '', username: '', apiToken: '', projectKey: '', isActive: false };
         });
         form.reset({ integrations: allToolsData });
       } else {
         // Initialize with all tools
-        form.reset({ integrations: ALMTools.map(tool => ({ tool, url: '', username: '', apiToken: '', isActive: false })) });
+        form.reset({ integrations: ALMTools.map(tool => ({ tool, url: '', username: '', apiToken: '', projectKey: '', isActive: false })) });
       }
     } catch (e) {
       console.error('Failed to load integrations from localStorage:', e);

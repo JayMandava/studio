@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck, Save, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { exportAllToJira, validateJiraConfig } from "@/lib/integrations/jira";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +52,8 @@ export function RequirementsForm() {
   const [showDomainAlert, setShowDomainAlert] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [activeIntegrations, setActiveIntegrations] = useState<any[]>([]);
+  const [isExportingToJira, setIsExportingToJira] = useState(false);
+  const [jiraExportProgress, setJiraExportProgress] = useState({ current: 0, total: 0 });
 
   useEffect(() => {
     try {
@@ -224,11 +227,92 @@ export function RequirementsForm() {
     }
   };
   
-  const handleAlmExport = (tool: string) => {
-    toast({
+  const handleAlmExport = async (tool: string) => {
+    if (!result || !result.requirementTestCases) {
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: "No test cases available to export.",
+      });
+      return;
+    }
+
+    // Only handle JIRA for now
+    if (tool.toLowerCase() !== 'jira') {
+      toast({
         title: `Exporting to ${tool}`,
         description: `Your test cases are being exported. This feature is coming soon.`,
-    });
+      });
+      return;
+    }
+
+    // Get JIRA configuration from active integrations
+    const jiraIntegration = activeIntegrations.find(
+      (integration) => integration.tool.toLowerCase() === 'jira'
+    );
+
+    if (!jiraIntegration) {
+      toast({
+        variant: "destructive",
+        title: "JIRA Not Configured",
+        description: "Please configure JIRA integration in the Integrations page.",
+      });
+      return;
+    }
+
+    if (!validateJiraConfig(jiraIntegration)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Configuration",
+        description: "JIRA configuration is incomplete. Please check your settings.",
+      });
+      return;
+    }
+
+    setIsExportingToJira(true);
+    setJiraExportProgress({ current: 0, total: result.requirementTestCases.length });
+
+    try {
+      const exportResult = await exportAllToJira(
+        {
+          url: jiraIntegration.url,
+          username: jiraIntegration.username,
+          apiToken: jiraIntegration.apiToken,
+          projectKey: jiraIntegration.projectKey,
+        },
+        result.requirementTestCases,
+        file?.name || 'Requirements',
+        (current, total, key) => {
+          setJiraExportProgress({ current, total });
+          if (key) {
+            console.log(`Created JIRA story: ${key}`);
+          }
+        }
+      );
+
+      if (exportResult.success > 0) {
+        toast({
+          title: "Export Successful",
+          description: `Successfully created ${exportResult.success} JIRA ${exportResult.success === 1 ? 'story' : 'stories'}.${exportResult.failed > 0 ? ` ${exportResult.failed} failed.` : ''}`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Export Failed",
+          description: exportResult.errors[0] || "Failed to create JIRA stories.",
+        });
+      }
+    } catch (error) {
+      console.error('JIRA export error:', error);
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred.",
+      });
+    } finally {
+      setIsExportingToJira(false);
+      setJiraExportProgress({ current: 0, total: 0 });
+    }
   }
 
   const handleSaveToNotebook = () => {
@@ -384,19 +468,33 @@ export function RequirementsForm() {
                     </CardTitle>
                     <CardDescription>
                         {result.requirementTestCases.reduce((acc, curr) => acc + curr.testCases.length, 0)} test cases generated for {result.requirementTestCases.length} requirements.
+                        {isExportingToJira && (
+                          <span className="ml-2 text-sm">
+                            (Exporting to JIRA: {jiraExportProgress.current}/{jiraExportProgress.total})
+                          </span>
+                        )}
                     </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={handleSaveToNotebook}>
+                    <Button variant="outline" onClick={handleSaveToNotebook} disabled={isExportingToJira}>
                         <Save className="mr-2 h-4 w-4"/>
                         Save to Notebook
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button>
-                          <Download className="mr-2 h-4 w-4" />
-                          Export
-                          <ChevronDown className="ml-2 h-4 w-4" />
+                        <Button disabled={isExportingToJira}>
+                          {isExportingToJira ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Exporting...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="mr-2 h-4 w-4" />
+                              Export
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </>
+                          )}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>

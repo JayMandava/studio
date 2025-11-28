@@ -41,7 +41,9 @@ import {
   ChevronDown,
   ListChecks,
   Send,
+  Loader2,
 } from 'lucide-react';
+import { exportAllToJira, validateJiraConfig } from '@/lib/integrations/jira';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,6 +70,8 @@ export function NotebookView() {
     useState<SavedNotebookEntry | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [activeIntegrations, setActiveIntegrations] = useState<any[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState({ current: 0, total: 0 });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -94,11 +98,92 @@ export function NotebookView() {
     setEntries([]);
   };
   
-  const handleAlmExport = (tool: string) => {
-    toast({
+  const handleAlmExport = async (tool: string) => {
+    if (!selectedEntry || !selectedEntry.data.requirementTestCases) {
+      toast({
+        variant: 'destructive',
+        title: 'Export Failed',
+        description: 'No test cases available to export.',
+      });
+      return;
+    }
+
+    // Only handle JIRA for now
+    if (tool.toLowerCase() !== 'jira') {
+      toast({
         title: `Exporting to ${tool}`,
         description: `Your test cases are being exported. This feature is coming soon.`,
-    });
+      });
+      return;
+    }
+
+    // Get JIRA configuration from active integrations
+    const jiraIntegration = activeIntegrations.find(
+      (integration) => integration.tool.toLowerCase() === 'jira'
+    );
+
+    if (!jiraIntegration) {
+      toast({
+        variant: 'destructive',
+        title: 'JIRA Not Configured',
+        description: 'Please configure JIRA integration in the Integrations page.',
+      });
+      return;
+    }
+
+    if (!validateJiraConfig(jiraIntegration)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid Configuration',
+        description: 'JIRA configuration is incomplete. Please check your settings.',
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    setExportProgress({ current: 0, total: selectedEntry.data.requirementTestCases.length });
+
+    try {
+      const result = await exportAllToJira(
+        {
+          url: jiraIntegration.url,
+          username: jiraIntegration.username,
+          apiToken: jiraIntegration.apiToken,
+          projectKey: jiraIntegration.projectKey,
+        },
+        selectedEntry.data.requirementTestCases,
+        selectedEntry.fileName,
+        (current, total, key) => {
+          setExportProgress({ current, total });
+          if (key) {
+            console.log(`Created JIRA story: ${key}`);
+          }
+        }
+      );
+
+      if (result.success > 0) {
+        toast({
+          title: 'Export Successful',
+          description: `Successfully created ${result.success} JIRA ${result.success === 1 ? 'story' : 'stories'}.${result.failed > 0 ? ` ${result.failed} failed.` : ''}`,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Export Failed',
+          description: result.errors[0] || 'Failed to create JIRA stories.',
+        });
+      }
+    } catch (error) {
+      console.error('JIRA export error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Export Failed',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred.',
+      });
+    } finally {
+      setIsExporting(false);
+      setExportProgress({ current: 0, total: 0 });
+    }
   }
 
   const handleExport = (
@@ -302,13 +387,27 @@ export function NotebookView() {
                 <p className="text-sm text-muted-foreground">
                   Saved on {new Date(selectedEntry?.date || '').toLocaleString()}
                 </p>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
+                  {isExporting && (
+                    <span className="text-sm text-muted-foreground">
+                      Exporting {exportProgress.current}/{exportProgress.total}...
+                    </span>
+                  )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button>
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                        <ChevronDown className="ml-2 h-4 w-4" />
+                      <Button disabled={isExporting}>
+                        {isExporting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="mr-2 h-4 w-4" />
+                            Export
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          </>
+                        )}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
