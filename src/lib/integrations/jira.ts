@@ -27,7 +27,7 @@ export interface JiraStoryResponse {
 }
 
 /**
- * Creates a JIRA story with test cases
+ * Creates a JIRA task with test cases
  */
 export async function createJiraStory(
   config: JiraConfig,
@@ -49,7 +49,7 @@ export async function createJiraStory(
       };
     }
 
-    // Create the story payload
+    // Create the task payload (using Task instead of Story for HEAL project)
     const payload = {
       fields: {
         project: {
@@ -58,7 +58,7 @@ export async function createJiraStory(
         summary: `[${fileName}] Requirement #${requirementIndex + 1}: ${requirement.requirement.substring(0, 100)}${requirement.requirement.length > 100 ? '...' : ''}`,
         description: description,
         issuetype: {
-          name: 'Story',
+          name: 'Task',  // Changed from 'Story' to 'Task' for HEAL project
         },
         labels: ['healthtestai', 'automated-test-cases'],
       },

@@ -332,22 +332,29 @@ export function IntegrationsForm() {
   useEffect(() => {
     try {
       const savedIntegrations = localStorage.getItem('almIntegrations');
+      console.log('Loading from localStorage:', savedIntegrations);
+
       if (savedIntegrations) {
         const parsed = JSON.parse(savedIntegrations);
+        console.log('Parsed integrations:', parsed);
+
         // Ensure all tools are present in the form state
         const allToolsData = ALMTools.map(tool => {
             const existing = parsed.find((p: any) => p.tool === tool);
             return existing || { tool, url: '', username: '', apiToken: '', projectKey: '', isActive: false };
         });
+
+        console.log('Setting form data:', allToolsData);
         form.reset({ integrations: allToolsData });
       } else {
+        console.log('No saved integrations, initializing empty');
         // Initialize with all tools
         form.reset({ integrations: ALMTools.map(tool => ({ tool, url: '', username: '', apiToken: '', projectKey: '', isActive: false })) });
       }
     } catch (e) {
       console.error('Failed to load integrations from localStorage:', e);
     }
-  }, [form]);
+  }, []);
 
   const handleFormSubmit = (data: IntegrationFormValues) => {
     console.log('Form submit triggered with data:', data);
