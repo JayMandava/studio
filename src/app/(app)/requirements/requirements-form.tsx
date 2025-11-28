@@ -287,19 +287,20 @@ export function RequirementsForm() {
           if (key) {
             console.log(`Created JIRA story: ${key}`);
           }
-        }
+        },
+        file || undefined
       );
 
       if (exportResult.success > 0) {
         toast({
           title: "Export Successful",
-          description: `Successfully created ${exportResult.success} JIRA ${exportResult.success === 1 ? 'story' : 'stories'}.${exportResult.failed > 0 ? ` ${exportResult.failed} failed.` : ''}`,
+          description: `Successfully created ${exportResult.success} JIRA ${exportResult.success === 1 ? 'task' : 'tasks'} with test case subtasks.${exportResult.failed > 0 ? ` ${exportResult.failed} failed.` : ''}`,
         });
       } else {
         toast({
           variant: "destructive",
           title: "Export Failed",
-          description: exportResult.errors[0] || "Failed to create JIRA stories.",
+          description: exportResult.errors[0] || "Failed to create JIRA tasks.",
         });
       }
     } catch (error) {

@@ -156,21 +156,22 @@ export function NotebookView() {
         (current, total, key) => {
           setExportProgress({ current, total });
           if (key) {
-            console.log(`Created JIRA story: ${key}`);
+            console.log(`Created JIRA task: ${key}`);
           }
-        }
+        },
+        undefined // File not available in notebook context
       );
 
       if (result.success > 0) {
         toast({
           title: 'Export Successful',
-          description: `Successfully created ${result.success} JIRA ${result.success === 1 ? 'story' : 'stories'}.${result.failed > 0 ? ` ${result.failed} failed.` : ''}`,
+          description: `Successfully created ${result.success} JIRA ${result.success === 1 ? 'task' : 'tasks'} with test case subtasks.${result.failed > 0 ? ` ${result.failed} failed.` : ''}`,
         });
       } else {
         toast({
           variant: 'destructive',
           title: 'Export Failed',
-          description: result.errors[0] || 'Failed to create JIRA stories.',
+          description: result.errors[0] || 'Failed to create JIRA tasks.',
         });
       }
     } catch (error) {
