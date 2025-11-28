@@ -49,13 +49,17 @@ export async function createJiraStory(
       };
     }
 
+    // Extract requirement ID (e.g., REQ-INT-001) from the requirement text
+    const reqIdMatch = requirement.requirement.match(/REQ-[A-Z]+-\d+/);
+    const summary = reqIdMatch ? reqIdMatch[0] : `Requirement #${requirementIndex + 1}`;
+
     // Create the task payload (using Task instead of Story for HEAL project)
     const payload = {
       fields: {
         project: {
           key: projectKey,
         },
-        summary: `[${fileName}] Requirement #${requirementIndex + 1}: ${requirement.requirement.substring(0, 100)}${requirement.requirement.length > 100 ? '...' : ''}`,
+        summary: summary,
         description: description,
         issuetype: {
           name: 'Task',  // Changed from 'Story' to 'Task' for HEAL project

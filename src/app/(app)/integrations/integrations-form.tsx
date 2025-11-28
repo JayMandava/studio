@@ -80,8 +80,8 @@ const IntegrationCard = ({
         }
     });
 
-    // Save to localStorage
-    onSave();
+    // Save to localStorage (silently)
+    onSave(true);
   };
 
   const handleTestConnection = async () => {
@@ -360,32 +360,21 @@ export function IntegrationsForm() {
 
   const handleFormSubmit = (data: IntegrationFormValues) => {
     console.log('Form submit triggered with data:', data);
-    try {
-      localStorage.setItem('almIntegrations', JSON.stringify(data.integrations));
-      toast({
-        title: 'All Configurations Saved',
-        description: 'Your settings for all ALM tools have been saved.',
-      });
-    } catch (e) {
-      console.error('Failed to save to localStorage:', e);
-      toast({
-        variant: 'destructive',
-        title: 'Save Failed',
-        description: 'Could not save integration settings.',
-      });
-    }
+    saveToLocalStorage(false); // Show toast on Save All
   };
 
-  const saveToLocalStorage = () => {
+  const saveToLocalStorage = (silent = true) => {
     const currentData = form.getValues();
     console.log('Saving to localStorage:', currentData);
     try {
       localStorage.setItem('almIntegrations', JSON.stringify(currentData.integrations));
       console.log('Saved successfully');
-      toast({
-        title: 'Settings Saved',
-        description: 'Your integration settings have been saved.',
-      });
+      if (!silent) {
+        toast({
+          title: 'Settings Saved',
+          description: 'Your integration settings have been saved.',
+        });
+      }
     } catch (e) {
       console.error('Failed to save to localStorage:', e);
       toast({
@@ -426,7 +415,7 @@ export function IntegrationsForm() {
           </div>
           {ALMTools.map(tool => (
             <TabsContent key={tool} value={tool} className="mt-6">
-              <IntegrationCard tool={tool} form={form} onSave={saveToLocalStorage} />
+              <IntegrationCard tool={tool} form={form} onSave={() => saveToLocalStorage(true)} />
             </TabsContent>
           ))}
         </Tabs>
