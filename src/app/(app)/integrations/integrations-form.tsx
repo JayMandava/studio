@@ -6,6 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -48,12 +49,15 @@ type IntegrationFormValues = z.infer<typeof formSchema>;
 const IntegrationCard = ({
   tool,
   form,
+  onSave,
 }: {
   tool: ALMTool;
   form: any;
+  onSave: () => void;
 }) => {
   const { toast } = useToast();
-  const { fields, append, remove, update } = useFieldArray({
+  const [isTesting, setIsTesting] = useState(false);
+  const { fields } = useFieldArray({
     control: form.control,
     name: 'integrations',
     keyName: 'key',
@@ -62,22 +66,10 @@ const IntegrationCard = ({
   const toolIndex = fields.findIndex((field: any) => field.tool === tool);
   const currentConfig = toolIndex > -1 ? fields[toolIndex] : null;
 
-  const onSubmit = (data: z.infer<typeof integrationSchema>) => {
-    if (toolIndex > -1) {
-      update(toolIndex, { ...data, tool });
-    } else {
-      append({ ...data, tool });
-    }
-    toast({
-      title: 'Configuration Saved',
-      description: `Your settings for ${tool} have been successfully saved.`,
-    });
-  };
-
   const handleActiveToggle = (checked: boolean) => {
     const currentValues = form.getValues(`integrations.${toolIndex}`);
     form.setValue(`integrations.${toolIndex}`, {...currentValues, isActive: checked });
-    
+
     // Deactivate all other integrations
     fields.forEach((field: any, index: number) => {
         if(field.tool !== tool) {
@@ -86,7 +78,80 @@ const IntegrationCard = ({
         }
     });
 
-    form.handleSubmit(onSubmit)();
+    // Save to localStorage
+    onSave();
+  };
+
+  const handleTestConnection = async () => {
+    if (!currentConfig) return;
+
+    const values = form.getValues(`integrations.${toolIndex}`);
+
+    // Validate required fields
+    if (!values.url || !values.username || !values.apiToken) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Information',
+        description: 'Please fill in all required fields before testing.',
+      });
+      return;
+    }
+
+    if (tool === 'Jira' && !values.projectKey) {
+      toast({
+        variant: 'destructive',
+        title: 'Project Key Required',
+        description: 'Please enter your JIRA project key before testing.',
+      });
+      return;
+    }
+
+    setIsTesting(true);
+
+    try {
+      // Test JIRA connection
+      if (tool === 'Jira') {
+        const authString = `${values.username}:${values.apiToken}`;
+        const encodedAuth = btoa(authString);
+
+        const response = await fetch(`${values.url}/rest/api/3/myself`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Basic ${encodedAuth}`,
+            'Accept': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          toast({
+            title: 'Connection Successful',
+            description: `Connected to JIRA as ${userData.displayName || values.username}`,
+          });
+        } else {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          toast({
+            variant: 'destructive',
+            title: 'Connection Failed',
+            description: `HTTP ${response.status}: Please check your credentials.`,
+          });
+        }
+      } else {
+        // Placeholder for other tools
+        toast({
+          title: 'Test Connection',
+          description: `Connection testing for ${tool} is coming soon.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Connection Error',
+        description: error instanceof Error ? error.message : 'Failed to connect to the server.',
+      });
+    } finally {
+      setIsTesting(false);
+    }
   }
 
   return (
@@ -171,6 +236,24 @@ const IntegrationCard = ({
             )}
           />
         )}
+        <div className="flex gap-2 mb-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleTestConnection}
+            disabled={!currentConfig || isTesting}
+            className="flex-1"
+          >
+            {isTesting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Testing...
+              </>
+            ) : (
+              'Test Connection'
+            )}
+          </Button>
+        </div>
         <div className="flex items-center justify-between rounded-lg border p-3">
              <div className="space-y-0.5">
                 <FormLabel>Set as Active Connection</FormLabel>
@@ -184,7 +267,7 @@ const IntegrationCard = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                       <Switch 
+                       <Switch
                          checked={field.value}
                          onCheckedChange={handleActiveToggle}
                          disabled={!currentConfig}
@@ -247,6 +330,24 @@ export function IntegrationsForm() {
     }
   };
 
+  const saveToLocalStorage = () => {
+    const currentData = form.getValues();
+    try {
+      localStorage.setItem('almIntegrations', JSON.stringify(currentData.integrations));
+      toast({
+        title: 'Settings Saved',
+        description: 'Your integration settings have been saved.',
+      });
+    } catch (e) {
+      console.error('Failed to save to localStorage:', e);
+      toast({
+        variant: 'destructive',
+        title: 'Save Failed',
+        description: 'Could not save integration settings.',
+      });
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
@@ -266,7 +367,7 @@ export function IntegrationsForm() {
           </div>
           {ALMTools.map(tool => (
             <TabsContent key={tool} value={tool} className="mt-6">
-              <IntegrationCard tool={tool} form={form} />
+              <IntegrationCard tool={tool} form={form} onSave={saveToLocalStorage} />
             </TabsContent>
           ))}
         </Tabs>
