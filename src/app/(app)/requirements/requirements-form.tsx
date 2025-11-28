@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck, Save, Send } from "lucide-react";
+import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck, Save, Send, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { exportAllToJira, validateJiraConfig } from "@/lib/integrations/jira";
 import {
@@ -40,8 +40,52 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { jsPDF } from "jspdf";
 import type { SavedNotebookEntry } from "@/app/(app)/notebook/notebook-view";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-const complianceStandards = ["FDA 21 CFR", "IEC 62304", "ISO 13485", "GDPR", "ISO 27001", "ISO 9001"];
+const complianceStandards = [
+  {
+    key: "fda-21-cfr",
+    label: "FDA 21 CFR",
+    title: "FDA 21 CFR Part 11",
+    description: "Electronic records and signatures must be trustworthy, secure, and auditable.",
+    focus: "Audit trails, validated workflows, role-based access, electronic signatures.",
+  },
+  {
+    key: "iec-62304",
+    label: "IEC 62304",
+    title: "IEC 62304",
+    description: "Defines the software lifecycle for medical devices with risk-driven controls.",
+    focus: "Risk classification, development lifecycle, verification/validation, maintenance.",
+  },
+  {
+    key: "iso-13485",
+    label: "ISO 13485",
+    title: "ISO 13485",
+    description: "Quality management system for medical devices with design and traceability rigor.",
+    focus: "Design controls, traceability, documented procedures, CAPA.",
+  },
+  {
+    key: "gdpr",
+    label: "GDPR",
+    title: "GDPR",
+    description: "Protects personal data and privacy for individuals in the EU.",
+    focus: "Lawful basis, consent, data minimization, breach response, DSR handling.",
+  },
+  {
+    key: "iso-27001",
+    label: "ISO 27001",
+    title: "ISO 27001",
+    description: "Information security management with controls for confidentiality, integrity, availability.",
+    focus: "Risk assessment, access controls, logging, incident response, supplier security.",
+  },
+  {
+    key: "iso-9001",
+    label: "ISO 9001",
+    title: "ISO 9001",
+    description: "General quality management focused on consistent processes and continuous improvement.",
+    focus: "Process controls, documentation, internal audits, customer feedback.",
+  },
+];
 
 export function RequirementsForm() {
   const [file, setFile] = useState<File | null>(null);
@@ -369,10 +413,27 @@ export function RequirementsForm() {
               </CardDescription>
                 <div className="flex flex-wrap gap-2 pt-2">
                     {complianceStandards.map((standard) => (
-                        <Badge key={standard} variant="secondary" className="flex items-center gap-1.5">
+                      <Popover key={standard.key}>
+                        <PopoverTrigger asChild>
+                          <Badge
+                            role="button"
+                            tabIndex={0}
+                            variant="secondary"
+                            className="flex items-center gap-1.5 cursor-pointer hover:border-primary"
+                          >
                             <BadgeCheck className="h-3 w-3" />
-                            {standard}
-                        </Badge>
+                            {standard.label}
+                            <Info className="h-3 w-3 text-muted-foreground" />
+                          </Badge>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="space-y-1.5">
+                            <p className="text-sm font-semibold">{standard.title}</p>
+                            <p className="text-sm text-muted-foreground">{standard.description}</p>
+                            <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">Focus:</span> {standard.focus}</p>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     ))}
                 </div>
             </CardHeader>
