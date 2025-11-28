@@ -331,8 +331,10 @@ export function IntegrationsForm() {
 
   useEffect(() => {
     try {
+      console.log('Checking localStorage...');
+      console.log('All localStorage keys:', Object.keys(localStorage));
       const savedIntegrations = localStorage.getItem('almIntegrations');
-      console.log('Loading from localStorage:', savedIntegrations);
+      console.log('Loading from localStorage (almIntegrations):', savedIntegrations);
 
       if (savedIntegrations) {
         const parsed = JSON.parse(savedIntegrations);

@@ -40,11 +40,17 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('JIRA API Error:', errorData);
+      console.error('JIRA API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData: errorData,
+        sentPayload: payload,
+      });
       return NextResponse.json(
         {
           error: errorData.errorMessages?.[0] || `HTTP ${response.status}: ${response.statusText}`,
           details: errorData,
+          sentPayload: payload,
         },
         { status: response.status }
       );
