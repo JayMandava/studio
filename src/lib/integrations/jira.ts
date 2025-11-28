@@ -20,6 +20,14 @@ export interface RequirementTestCase {
   testCases: TestCase[];
 }
 
+interface EnhancedJiraCopy {
+  summaryTagline: string;
+  given?: string;
+  when?: string;
+  then?: string;
+  notes?: string;
+}
+
 export interface JiraSubtaskResponse {
   success: boolean;
   key?: string;
@@ -63,8 +71,7 @@ export async function createJiraStory(
     requirementText = requirementText.replace(/REQ-[A-Z]+-\d+/g, ''); // Remove REQ IDs
     requirementText = requirementText.replace(/\([^)]*\)/g, ''); // Remove (Critical), (High), etc.
     requirementText = requirementText.replace(/^[:\s]+/, ''); // Remove leading colons and spaces
-    const briefSummary = extractBriefSummary(requirementText);
-    const summary = `${requirementId}: ${briefSummary}`;
+    const summary = await buildRequirementSummary(requirementText, requirementId);
 
     // Format the parent task description with requirement details
     const description = formatParentTaskDescription(requirement);
@@ -118,7 +125,8 @@ export async function createJiraStory(
       config,
       requirement.testCases,
       parentKey,
-      projectKey
+      projectKey,
+      requirementText
     );
 
     // Check if any subtasks failed
@@ -148,20 +156,84 @@ export async function createJiraStory(
 /**
  * Extracts a brief summary from requirement text (first sentence or up to 80 chars)
  */
-function extractBriefSummary(text: string): string {
+function extractBriefSummary(text: string, maxLength = 80): string {
   // Remove any leading/trailing whitespace
-  text = text.trim();
+  text = text.trim().replace(/\s+/g, ' ');
 
   // Try to get first sentence
-  const firstSentence = text.split(/[.!?]\s/)[0];
+  const firstSentence = text.split(/[.!?](\s|$)/)[0].trim();
 
   // If first sentence is reasonable length, use it
-  if (firstSentence.length <= 80) {
+  if (firstSentence.length > 0 && firstSentence.length <= maxLength) {
     return firstSentence;
   }
 
-  // Otherwise, truncate to 80 chars and add ellipsis
-  return text.substring(0, 77) + '...';
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  // Otherwise, truncate near a word boundary and add an indicator
+  const cutoff = text.lastIndexOf(' ', maxLength - 10);
+  const slicePoint = cutoff > 40 ? cutoff : maxLength - 3;
+  return `${text.substring(0, slicePoint).trim()}... (details in description)`;
+}
+
+function cleanSummary(summary: string, maxLength = 110): string {
+  const normalized = summary.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+  return `${normalized.substring(0, maxLength - 3).trim()}...`;
+}
+
+async function fetchEnhancedJiraCopy(params: {
+  requirement: string;
+  testCaseDescription?: string;
+  target: 'requirement' | 'testcase';
+}): Promise<EnhancedJiraCopy | null> {
+  try {
+    const response = await fetch('/api/jira/enhance-copy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.success || !data.summaryTagline) {
+      return null;
+    }
+
+    return {
+      summaryTagline: data.summaryTagline,
+      given: data.given,
+      when: data.when,
+      then: data.then,
+      notes: data.notes,
+    };
+  } catch (error) {
+    console.warn('LLM polish unavailable, using fallback summaries.', error);
+    return null;
+  }
+}
+
+async function buildRequirementSummary(requirementText: string, requirementId: string): Promise<string> {
+  const fallback = `${requirementId}: ${cleanSummary(extractBriefSummary(requirementText, 100), 100)}`;
+  const enhanced = await fetchEnhancedJiraCopy({
+    requirement: requirementText,
+    target: 'requirement',
+  });
+
+  if (enhanced?.summaryTagline) {
+    return `${requirementId}: ${cleanSummary(enhanced.summaryTagline, 100)}`;
+  }
+
+  return fallback;
 }
 
 /**
@@ -253,8 +325,14 @@ function convertToBDDFormat(description: string): { given: string; when: string;
 /**
  * Formats a test case in BDD format using ADF
  */
-function formatBDDTestCase(testCase: TestCase, index: number): any {
-  const bdd = convertToBDDFormat(testCase.description);
+function formatBDDTestCase(testCase: TestCase, index: number, enhanced?: EnhancedJiraCopy): any {
+  const baseBdd = convertToBDDFormat(testCase.description);
+  const bdd = {
+    given: enhanced?.given || baseBdd.given,
+    when: enhanced?.when || baseBdd.when,
+    then: enhanced?.then || baseBdd.then,
+    notes: enhanced?.notes,
+  };
 
   const content: any[] = [
     {
@@ -279,6 +357,16 @@ function formatBDDTestCase(testCase: TestCase, index: number): any {
       ],
     },
   ];
+
+  if (bdd.notes) {
+    content.push({
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'Notes: ', marks: [{ type: 'strong' }] },
+        { type: 'text', text: bdd.notes },
+      ],
+    });
+  }
 
   // Add compliance standards if present
   if (testCase.compliance && testCase.compliance.length > 0) {
@@ -320,14 +408,25 @@ async function createSubtasksForTestCases(
   config: JiraConfig,
   testCases: TestCase[],
   parentKey: string,
-  projectKey: string
+  projectKey: string,
+  requirementText: string
 ): Promise<JiraSubtaskResponse[]> {
   const results: JiraSubtaskResponse[] = [];
 
   for (let i = 0; i < testCases.length; i++) {
     const testCase = testCases[i];
-    const summary = `TC-${i + 1}: ${extractBriefSummary(testCase.description)}`;
-    const description = formatBDDTestCase(testCase, i);
+    const enhancedCopy = await fetchEnhancedJiraCopy({
+      requirement: requirementText,
+      testCaseDescription: testCase.description,
+      target: 'testcase',
+    });
+
+    const summaryTagline = cleanSummary(
+      enhancedCopy?.summaryTagline || extractBriefSummary(testCase.description, 100),
+      100
+    );
+    const summary = `TC-${i + 1}: ${summaryTagline}`;
+    const description = formatBDDTestCase(testCase, i, enhancedCopy || undefined);
 
     const payload = {
       fields: {
