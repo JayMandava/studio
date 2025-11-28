@@ -20,15 +20,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Debug logging (remove in production)
+    console.log('JIRA Test Connection Debug:');
+    console.log('- URL:', url);
+    console.log('- Username:', username);
+    console.log('- API Token length:', apiToken.length);
+    console.log('- API Token starts with:', apiToken.substring(0, 10) + '...');
+
     // Create Basic Auth header
     const authString = `${username}:${apiToken}`;
     const encodedAuth = Buffer.from(authString).toString('base64');
 
     // Clean up URL (remove double slashes if any)
     const cleanUrl = url.replace(/\/+$/, '');
+    const testUrl = `${cleanUrl}/rest/api/3/myself`;
+
+    console.log('- Calling:', testUrl);
 
     // Call JIRA API
-    const response = await fetch(`${cleanUrl}/rest/api/3/myself`, {
+    const response = await fetch(testUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${encodedAuth}`,
@@ -37,13 +47,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log('- Response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error');
+      console.error('JIRA API Error Response:', errorText);
+
       return NextResponse.json(
         {
           error: 'JIRA authentication failed',
           details: errorText,
-          status: response.status
+          status: response.status,
+          hint: response.status === 401
+            ? 'Check that you are using your EMAIL address (not username) and the API KEY from line 7 of jira.md'
+            : 'Check JIRA URL and credentials'
         },
         { status: response.status }
       );
