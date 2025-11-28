@@ -295,7 +295,23 @@ export function RequirementsForm() {
               <div className="grid w-full max-w-sm items-center gap-2">
                 <Label htmlFor="requirements-file">Document</Label>
                 <div className="flex gap-2">
-                  <Input id="requirements-file" ref={fileInputRef} type="file" onChange={handleFileChange} accept=".pdf,.xml,.md,application/pdf,text/xml,text/markdown" />
+                  <input
+                    id="requirements-file"
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".pdf,.xml,.md,application/pdf,text/xml,text/markdown"
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Choose File
+                  </Button>
                 </div>
                 {file && (
                     <div className="flex items-center justify-between rounded-md border border-input bg-background p-2 text-sm text-muted-foreground">
