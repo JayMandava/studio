@@ -786,8 +786,8 @@ export function RequirementsForm() {
                                               {tc.compliance.map(standard => (
                                                 <Badge
                                                   key={standard}
-                                                  variant="secondary"
-                                                  className="font-normal bg-secondary/15 text-secondary-foreground border border-secondary/30"
+                                                  variant="success"
+                                                  className="font-normal"
                                                 >
                                                   {standard}
                                                 </Badge>
