@@ -612,9 +612,9 @@ export function RequirementsForm() {
                             variant="secondary"
                             className="flex items-center gap-1.5 cursor-pointer hover:border-primary"
                           >
-                            <BadgeCheck className="h-3 w-3" />
+                            <VerifiedIcon className="h-3 w-3" fontSize="inherit" />
                             {standard.label}
-                            <Info className="h-3 w-3 text-muted-foreground" />
+                            <InfoOutlinedIcon className="h-3 w-3 text-muted-foreground" />
                           </Badge>
                         </PopoverTrigger>
                         <PopoverContent className="w-80">
