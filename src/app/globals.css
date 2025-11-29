@@ -46,7 +46,7 @@
     --sidebar-foreground: 220 7% 18%;
     --sidebar-primary: 213 82% 52%; /* blue dominates */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 213 82% 62%; /* subtle blue accent to stay cohesive */
+    --sidebar-accent: 213 82% 45%; /* slightly deeper blue accent for chips */
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 219 29% 90%;
     --sidebar-ring: 213 82% 52%;
@@ -91,7 +91,7 @@
     --sidebar-foreground: 210 17% 90%;
     --sidebar-primary: 213 83% 70%; /* blue lead */
     --sidebar-primary-foreground: 220 6% 14%;
-    --sidebar-accent: 213 83% 60%; /* blue accent in dark as well */
+    --sidebar-accent: 213 83% 55%; /* blue accent in dark */
     --sidebar-accent-foreground: 220 6% 14%;
     --sidebar-border: 215 6% 38%;
     --sidebar-ring: 213 83% 70%;
