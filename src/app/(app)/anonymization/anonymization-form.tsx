@@ -203,9 +203,9 @@ export function AnonymizationForm() {
                     <p className="text-sm text-muted-foreground mb-4">Select how PII should be transformed.</p>
                     <RadioGroup value={strategy} onValueChange={(value) => setStrategy(value as (typeof anonymizationStrategies)[number])} disabled={loading}>
                       {anonymizationStrategies.map((item) => (
-                        <div key={item} className="flex items-center space-x-2">
+                        <div key={item} className="flex items-center space-x-3 rounded-2xl bg-card/60 px-3 py-2">
                           <RadioGroupItem value={item} id={item} />
-                          <Label htmlFor={item} className="font-normal">{item}</Label>
+                          <Label htmlFor={item} className="font-normal cursor-pointer">{item}</Label>
                         </div>
                       ))}
                     </RadioGroup>
@@ -215,14 +215,14 @@ export function AnonymizationForm() {
                     <p className="text-sm text-muted-foreground mb-4">Choose which types of data to find and anonymize.</p>
                     <div className="grid grid-cols-2 gap-2">
                       {piiCategories.map((item) => (
-                        <div key={item} className="flex items-center space-x-2">
+                        <div key={item} className="flex items-center space-x-3 rounded-2xl bg-card/60 px-3 py-2">
                           <Checkbox
                             id={item}
                             checked={selectedPii.includes(item)}
                             onCheckedChange={(checked) => handlePiiChange(item, checked)}
                             disabled={loading}
                           />
-                          <Label htmlFor={item} className="font-normal">{item}</Label>
+                          <Label htmlFor={item} className="font-normal cursor-pointer">{item}</Label>
                         </div>
                       ))}
                     </div>
