@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked"
 
 import { cn } from "@/lib/utils"
 
@@ -34,7 +33,7 @@ const RadioGroupItem = React.forwardRef<
       {...props}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <RadioButtonCheckedIcon className="h-3 w-3 text-current shrink-0" fontSize="small" />
+        <span className="block h-2.5 w-2.5 rounded-full bg-primary" />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )
