@@ -2,8 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { material3Theme } from '@/theme/material3';
+import { MuiThemeProvider } from '@/components/providers/mui-theme-provider';
 
 export const metadata: Metadata = {
   title: 'HealthTestAI',
@@ -23,13 +22,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider theme={material3Theme}>
-          <CssBaseline />
+        <MuiThemeProvider>
           <SidebarProvider>
             {children}
           </SidebarProvider>
           <Toaster />
-        </ThemeProvider>
+        </MuiThemeProvider>
       </body>
     </html>
   );

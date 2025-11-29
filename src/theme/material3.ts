@@ -1,7 +1,8 @@
 import { createTheme } from '@mui/material/styles';
+import type { ThemeOptions } from '@mui/material/styles';
 
-// Material 3-inspired theme using the Google-aligned palette already set in globals.css.
-export const material3Theme = createTheme({
+// Theme options (plain object) so we avoid passing non-serializable functions from server to client.
+export const material3ThemeOptions: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
@@ -60,4 +61,6 @@ export const material3Theme = createTheme({
       },
     },
   },
-});
+};
+
+export const createMaterial3Theme = () => createTheme(material3ThemeOptions);
