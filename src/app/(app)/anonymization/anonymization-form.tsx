@@ -18,7 +18,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck, Sparkles, Lightbulb, AlertTriangle, Copy, Check } from "lucide-react";
+import CircularProgress from "@mui/material/CircularProgress";
+import ShieldIcon from "@mui/icons-material/Shield";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckIcon from "@mui/icons-material/Check";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -228,12 +234,12 @@ export function AnonymizationForm() {
               <Button type="submit" disabled={loading}>
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <CircularProgress size={16} className="mr-2 text-primary" />
                     Anonymizing...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <AutoAwesomeIcon fontSize="small" className="mr-2" />
                     Anonymize & Analyze
                   </>
                 )}
@@ -269,7 +275,7 @@ export function AnonymizationForm() {
         {error && (
           <Card className="border-destructive">
               <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle className="h-5 w-5"/> Error</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-destructive"><WarningAmberIcon className="h-5 w-5"/> Error</CardTitle>
               </CardHeader>
               <CardContent>
                   <p className="text-destructive">{error}</p>
@@ -284,7 +290,7 @@ export function AnonymizationForm() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="h-6 w-6 text-primary" />
+                    <ShieldIcon className="h-6 w-6 text-primary" />
                     Anonymized Data
                   </CardTitle>
                   <CardDescription>
@@ -294,7 +300,7 @@ export function AnonymizationForm() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" onClick={() => handleCopy(result.anonymizedData, 'anonymizedData')}>
-                            {copiedField === 'anonymizedData' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            {copiedField === 'anonymizedData' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ContentCopyIcon className="h-4 w-4" />}
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -316,14 +322,14 @@ export function AnonymizationForm() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div className="space-y-1.5">
                     <CardTitle className="flex items-center gap-2">
-                      <ShieldCheck className="h-6 w-6 text-accent-foreground" />
+                      <ShieldIcon className="h-6 w-6 text-accent-foreground" />
                       GDPR Compliance Summary
                     </CardTitle>
                   </div>
                    <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" onClick={() => handleCopy(result.complianceSummary, 'complianceSummary')}>
-                                {copiedField === 'complianceSummary' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                {copiedField === 'complianceSummary' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ContentCopyIcon className="h-4 w-4" />}
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -342,14 +348,14 @@ export function AnonymizationForm() {
                  <CardHeader className="flex flex-row items-center justify-between">
                   <div className="space-y-1.5">
                     <CardTitle className="flex items-center gap-2">
-                      <Lightbulb className="h-6 w-6 text-accent-foreground" />
+                      <LightbulbIcon className="h-6 w-6 text-accent-foreground" />
                       Suggested Information
                     </CardTitle>
                   </div>
                    <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" onClick={() => handleCopy(result.suggestedInformation, 'suggestedInformation')}>
-                                {copiedField === 'suggestedInformation' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                {copiedField === 'suggestedInformation' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ContentCopyIcon className="h-4 w-4" />}
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>

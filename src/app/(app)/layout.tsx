@@ -3,15 +3,19 @@ import { Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader
 import { Logo } from "@/components/logo";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, ShieldOff, Book, Puzzle } from 'lucide-react';
+import HomeIcon from '@mui/icons-material/HomeRounded';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ShieldIcon from '@mui/icons-material/Shield';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import ExtensionIcon from '@mui/icons-material/Extension';
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/requirements', label: 'Requirements', icon: FileText },
-  { href: '/anonymization', label: 'Anonymization', icon: ShieldOff },
-  { href: '/notebook', label: 'Notebook', icon: Book },
-  { href: '/integrations', label: 'Integrations', icon: Puzzle },
+  { href: '/dashboard', label: 'Dashboard', icon: HomeIcon },
+  { href: '/requirements', label: 'Requirements', icon: DescriptionIcon },
+  { href: '/anonymization', label: 'Anonymization', icon: ShieldIcon },
+  { href: '/notebook', label: 'Notebook', icon: MenuBookIcon },
+  { href: '/integrations', label: 'Integrations', icon: ExtensionIcon },
 ];
 
 function SidebarNav() {
