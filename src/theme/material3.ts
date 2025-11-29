@@ -43,7 +43,7 @@ export const material3ThemeOptions: ThemeOptions = {
     borderRadius: 12,
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif',
+    fontFamily: '"Roboto", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif',
     button: {
       textTransform: 'none',
       fontWeight: 600,

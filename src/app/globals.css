@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    /* Google-inspired light palette (blue, green, yellow, red) */
-    --background: 210 17% 98%; /* #f8f9fa */
-    --foreground: 220 7% 20%; /* #202124 */
+    /* Google-inspired light palette (blue-dominant with full spectrum) */
+    --background: 217 70% 97%; /* soft blue surface #f4f7ff */
+    --foreground: 220 7% 18%; /* #202124 adjusted slightly darker */
 
     --card: 0 0% 100%; /* white cards for crisp contrast */
-    --card-foreground: 220 7% 20%;
+    --card-foreground: 220 7% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 7% 20%;
+    --popover-foreground: 220 7% 18%;
 
-    --primary: 213 82% 52%; /* Google Blue #1A73E8 */
+    --primary: 213 82% 52%; /* Google Blue #1A73E8 dominant */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 137 55% 45%; /* Google Green #34A853 */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 11% 94%; /* #e8eaed */
-    --muted-foreground: 220 7% 40%;
+    --muted: 221 44% 95%; /* light bluish tint #eef3ff */
+    --muted-foreground: 220 7% 38%;
 
     --accent: 43 96% 49%; /* Google Yellow #fbbc04 */
     --accent-foreground: 220 7% 20%;
@@ -29,10 +29,10 @@
     --destructive: 3 79% 55%; /* Google Red #ea4335 */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 214 16% 89%; /* #dadce0 */
-    --input: 214 16% 89%;
+    --border: 219 29% 90%; /* soft blue-gray border */
+    --input: 219 29% 90%;
     --ring: 213 82% 52%; /* focus ring matches primary */
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* closer to Material 3 shape scale */
 
     /* Charts - full Google spectrum */
     --chart-1: 213 82% 52%; /* blue */
@@ -42,13 +42,13 @@
     --chart-5: 271 70% 54%; /* purple */
 
     /* Sidebar */
-    --sidebar-background: 210 14% 95%; /* light neutral */
-    --sidebar-foreground: 220 7% 20%;
+    --sidebar-background: 217 70% 97%; /* match page surface */
+    --sidebar-foreground: 220 7% 18%;
     --sidebar-primary: 213 82% 52%; /* blue */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 43 96% 49%; /* yellow accent tags */
-    --sidebar-accent-foreground: 220 7% 20%;
-    --sidebar-border: 214 16% 89%;
+    --sidebar-accent: 3 79% 55%; /* red tags to surface spectrum */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 219 29% 90%;
     --sidebar-ring: 213 82% 52%;
   }
   .dark {
@@ -68,8 +68,8 @@
     --secondary: 137 43% 65%; /* green #81c995 */
     --secondary-foreground: 220 6% 14%;
 
-    --muted: 220 5% 26%; /* #3c4043 */
-    --muted-foreground: 210 17% 80%;
+    --muted: 221 6% 22%; /* slightly lighter for separation */
+    --muted-foreground: 210 17% 82%;
 
     --accent: 43 88% 62%; /* yellow #fbd856 */
     --accent-foreground: 220 6% 14%;
@@ -77,8 +77,8 @@
     --destructive: 3 70% 65%; /* red #f28b82 */
     --destructive-foreground: 210 17% 90%;
 
-    --border: 215 6% 40%; /* #5f6368 */
-    --input: 215 6% 40%;
+    --border: 215 6% 38%; /* soften borders */
+    --input: 215 6% 38%;
     --ring: 213 83% 70%;
 
     --chart-1: 213 83% 70%; /* blue */
@@ -87,13 +87,13 @@
     --chart-4: 137 43% 65%; /* green */
     --chart-5: 271 55% 62%; /* purple */
 
-    --sidebar-background: 220 6% 18%;
+    --sidebar-background: 220 6% 16%;
     --sidebar-foreground: 210 17% 90%;
     --sidebar-primary: 213 83% 70%;
     --sidebar-primary-foreground: 220 6% 14%;
     --sidebar-accent: 3 70% 65%; /* red accent tags */
     --sidebar-accent-foreground: 220 6% 14%;
-    --sidebar-border: 215 6% 40%;
+    --sidebar-border: 215 6% 38%;
     --sidebar-ring: 213 83% 70%;
   }
 }
