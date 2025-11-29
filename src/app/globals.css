@@ -8,7 +8,7 @@
     --background: 217 70% 97%; /* soft blue surface #f4f7ff */
     --foreground: 220 7% 18%; /* #202124 adjusted slightly darker */
 
-    --card: 0 0% 100%; /* white cards for crisp contrast */
+    --card: 48 100% 97%; /* soft warm tint for cards (#fff9e6) to gently weave yellow in */
     --card-foreground: 220 7% 18%;
 
     --popover: 0 0% 100%;
@@ -46,8 +46,8 @@
     --sidebar-foreground: 220 7% 18%;
     --sidebar-primary: 213 82% 52%; /* blue dominates */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 43 96% 49%; /* yellow accent chips to keep it bright, not harsh */
-    --sidebar-accent-foreground: 220 7% 18%;
+    --sidebar-accent: 213 82% 62%; /* softer blue accent chips to stay cohesive */
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 219 29% 90%;
     --sidebar-ring: 213 82% 52%;
   }
@@ -91,7 +91,7 @@
     --sidebar-foreground: 210 17% 90%;
     --sidebar-primary: 213 83% 70%; /* blue lead */
     --sidebar-primary-foreground: 220 6% 14%;
-    --sidebar-accent: 43 88% 62%; /* yellow accent in dark mode for softer contrast */
+    --sidebar-accent: 213 83% 60%; /* blue accent in dark as well */
     --sidebar-accent-foreground: 220 6% 14%;
     --sidebar-border: 215 6% 38%;
     --sidebar-ring: 213 83% 70%;
