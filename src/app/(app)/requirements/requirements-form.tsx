@@ -656,7 +656,7 @@ export function RequirementsForm() {
                       {files.map((selectedFile, index) => (
                         <div key={`${selectedFile.name}-${index}`} className="flex items-center justify-between rounded-md border border-input bg-background p-2 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2 overflow-hidden">
-                                <FileText className="h-4 w-4 flex-shrink-0"/>
+                            <DescriptionIcon className="h-4 w-4 flex-shrink-0" fontSize="inherit" />
                                 <span className="truncate">{selectedFile.name}</span>
                                 <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
                                   {selectedFile.name.toLowerCase().endsWith('.csv') ? 'Past run' : 'Requirement'}
