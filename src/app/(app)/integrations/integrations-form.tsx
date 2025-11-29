@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   Card,
   CardContent,
@@ -25,7 +25,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, Server, Trash2, Plug, CheckCircle, AlertTriangle } from 'lucide-react';
+import SaveIcon from "@mui/icons-material/Save";
+import DnsIcon from "@mui/icons-material/Dns";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import PowerIcon from "@mui/icons-material/PowerSettingsNew";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Switch } from '@/components/ui/switch';
 
 const ALMTools = ['Jira', 'Polarion', 'Azure DevOps', 'ALM'] as const;
@@ -162,17 +167,17 @@ const IntegrationCard = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <Server className="h-6 w-6" />
+             <DnsIcon className="h-6 w-6" />
              <CardTitle>{tool}</CardTitle>
           </div>
           {currentConfig && currentConfig.isActive ? (
              <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
-                <CheckCircle className="h-4 w-4" />
+             <CheckCircleIcon className="h-4 w-4" />
                 <span>Active</span>
              </div>
           ) : (
              <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                <AlertTriangle className="h-4 w-4" />
+             <WarningAmberIcon className="h-4 w-4" />
                 <span>Inactive</span>
              </div>
           )}
@@ -282,7 +287,7 @@ const IntegrationCard = ({
           >
             {isTesting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <CircularProgress size={16} className="mr-2 text-primary" />
                 Testing...
               </>
             ) : (
@@ -409,7 +414,7 @@ export function IntegrationsForm() {
               console.log('Current form values:', form.getValues());
               console.log('Form errors:', form.formState.errors);
             }}>
-                <Save className="mr-2 h-4 w-4" />
+                <SaveIcon className="mr-2 h-4 w-4" fontSize="inherit" />
                 Save All
             </Button>
           </div>

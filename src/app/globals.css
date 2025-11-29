@@ -4,115 +4,97 @@
 
 @layer base {
   :root {
-    /* Base colors - Clean background with navy blue accents */
-    --background: 0 0% 98%;
-    --foreground: 216 25% 24%; /* Dark Navy #2e3b4c */
+    /* Google-inspired light palette (blue-dominant with full spectrum) */
+    --background: 217 70% 97%; /* soft blue surface #f4f7ff */
+    --foreground: 220 7% 18%; /* #202124 adjusted slightly darker */
 
-    /* Cards - Light blue-gray tint */
-    --card: 209 20% 95%;
-    --card-foreground: 216 25% 24%; /* Dark Navy #2e3b4c */
+    --card: 0 0% 100%; /* clean white cards */
+    --card-foreground: 220 7% 18%;
 
-    /* Popovers */
     --popover: 0 0% 100%;
-    --popover-foreground: 216 25% 24%; /* Dark Navy #2e3b4c */
+    --popover-foreground: 220 7% 18%;
 
-    /* PRIMARY - #395879 taking prominence! */
-    --primary: 209 36% 35%; /* #395879 - PROMINENT! */
+    --primary: 213 82% 52%; /* Google Blue #1A73E8 dominant */
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Medium gray-blue #556b7d */
-    --secondary: 209 19% 41%; /* #556b7d */
+    --secondary: 137 55% 45%; /* Google Green #34A853 */
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted - Light backgrounds */
-    --muted: 209 20% 90%;
-    --muted-foreground: 209 19% 41%; /* #556b7d */
+    --muted: 221 44% 95%; /* light bluish tint #eef3ff */
+    --muted-foreground: 220 7% 38%;
 
-    /* Accent - Blue-gray #496378 */
-    --accent: 207 24% 38%; /* #496378 */
-    --accent-foreground: 0 0% 100%;
+    --accent: 43 96% 49%; /* Google Yellow #fbbc04 */
+    --accent-foreground: 220 7% 18%;
 
-    /* Destructive */
-    --destructive: 0 50% 45%;
+    --destructive: 3 79% 55%; /* Google Red #ea4335 */
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders - Light blue-gray */
-    --border: 209 20% 80%;
-    --input: 209 20% 85%;
-    --ring: 209 36% 35%; /* #395879 focus ring */
-    --radius: 0.5rem;
+    --border: 219 29% 90%; /* soft blue-gray border */
+    --input: 219 29% 90%;
+    --ring: 213 82% 52%; /* focus ring matches primary */
+    --radius: 1rem; /* more rounded for expressive feel */
 
-    /* Charts - Blue gradient */
-    --chart-1: 209 36% 35%; /* #395879 */
-    --chart-2: 216 25% 24%; /* #2e3b4c */
-    --chart-3: 207 24% 38%; /* #496378 */
-    --chart-4: 209 19% 41%; /* #556b7d */
-    --chart-5: 209 20% 60%; /* Lighter variant */
-
-    /* Sidebar - Dark Navy #2e3b4c */
-    --sidebar-background: 216 25% 24%; /* #2e3b4c - BOLD! */
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 209 36% 45%; /* Lighter #395879 */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 209 36% 35%; /* #395879 */
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 216 25% 30%;
-    --sidebar-ring: 209 36% 45%;
-  }
-  .dark {
-    /* Dark mode - Dark Navy foundation */
-    --background: 216 25% 12%; /* Darker #2e3b4c variant */
-    --foreground: 209 20% 85%;
-
-    /* Cards */
-    --card: 216 25% 16%;
-    --card-foreground: 209 20% 85%;
-
-    /* Popovers */
-    --popover: 216 25% 16%;
-    --popover-foreground: 209 20% 85%;
-
-    /* PRIMARY - Lighter blue for dark mode */
-    --primary: 209 36% 50%; /* Lighter #395879 */
-    --primary-foreground: 0 0% 100%;
-
-    /* Secondary */
-    --secondary: 209 19% 50%; /* Lighter #556b7d */
-    --secondary-foreground: 0 0% 100%;
-
-    /* Muted */
-    --muted: 216 25% 20%;
-    --muted-foreground: 209 20% 65%;
-
-    /* Accent */
-    --accent: 207 24% 45%; /* Lighter #496378 */
-    --accent-foreground: 0 0% 100%;
-
-    /* Destructive */
-    --destructive: 0 50% 45%;
-    --destructive-foreground: 0 0% 98%;
-
-    /* Borders */
-    --border: 216 25% 28%;
-    --input: 216 25% 28%;
-    --ring: 209 36% 50%;
-
-    /* Charts */
-    --chart-1: 209 36% 50%;
-    --chart-2: 207 24% 50%;
-    --chart-3: 209 19% 55%;
-    --chart-4: 216 25% 40%;
-    --chart-5: 209 20% 70%;
+    /* Charts - full Google spectrum */
+    --chart-1: 213 82% 52%; /* blue */
+    --chart-2: 3 79% 55%;   /* red */
+    --chart-3: 43 96% 49%;  /* yellow */
+    --chart-4: 137 55% 45%; /* green */
+    --chart-5: 271 70% 54%; /* purple */
 
     /* Sidebar */
-    --sidebar-background: 216 25% 14%;
-    --sidebar-foreground: 209 20% 85%;
-    --sidebar-primary: 209 36% 50%;
+    --sidebar-background: 217 70% 97%; /* match page surface */
+    --sidebar-foreground: 220 7% 18%;
+    --sidebar-primary: 213 82% 52%; /* blue dominates */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 216 25% 22%;
-    --sidebar-accent-foreground: 209 20% 85%;
-    --sidebar-border: 216 25% 25%;
-    --sidebar-ring: 209 36% 50%;
+    --sidebar-accent: 213 82% 45%; /* slightly deeper blue accent for chips */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 219 29% 90%;
+    --sidebar-ring: 213 82% 52%;
+  }
+  .dark {
+    /* Dark mode with Google spectrum */
+    --background: 220 6% 14%; /* #202124 */
+    --foreground: 210 17% 90%; /* #e8eaed */
+
+    --card: 220 6% 18%; /* #2d2f33 */
+    --card-foreground: 210 17% 90%;
+
+    --popover: 220 6% 18%;
+    --popover-foreground: 210 17% 90%;
+
+    --primary: 213 83% 70%; /* blue #8ab4f8 */
+    --primary-foreground: 220 6% 14%;
+
+    --secondary: 137 43% 65%; /* green #81c995 */
+    --secondary-foreground: 220 6% 14%;
+
+    --muted: 221 6% 22%; /* slightly lighter for separation */
+    --muted-foreground: 210 17% 82%;
+
+    --accent: 43 88% 62%; /* yellow #fbd856 */
+    --accent-foreground: 220 6% 14%;
+
+    --destructive: 3 70% 65%; /* red #f28b82 */
+    --destructive-foreground: 210 17% 90%;
+
+    --border: 215 6% 38%; /* soften borders */
+    --input: 215 6% 38%;
+    --ring: 213 83% 70%;
+
+    --chart-1: 213 83% 70%; /* blue */
+    --chart-2: 3 70% 65%;   /* red */
+    --chart-3: 43 88% 62%;  /* yellow */
+    --chart-4: 137 43% 65%; /* green */
+    --chart-5: 271 55% 62%; /* purple */
+
+    --sidebar-background: 220 6% 16%;
+    --sidebar-foreground: 210 17% 90%;
+    --sidebar-primary: 213 83% 70%; /* blue lead */
+    --sidebar-primary-foreground: 220 6% 14%;
+    --sidebar-accent: 213 83% 55%; /* blue accent in dark */
+    --sidebar-accent-foreground: 220 6% 14%;
+    --sidebar-border: 215 6% 38%;
+    --sidebar-ring: 213 83% 70%;
   }
 }
 

@@ -19,7 +19,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Loader2, ListChecks, Download, AlertTriangle, FileText, X, ChevronDown, BadgeCheck, Save, Send, Info } from "lucide-react";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CircularProgress from "@mui/material/CircularProgress";
+import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
+import DownloadIcon from "@mui/icons-material/Download";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DescriptionIcon from "@mui/icons-material/Description";
+import CloseIcon from "@mui/icons-material/Close";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import SaveIcon from "@mui/icons-material/Save";
+import SendIcon from "@mui/icons-material/Send";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Badge } from "@/components/ui/badge";
 import { exportAllToJira, validateJiraConfig } from "@/lib/integrations/jira";
 import {
@@ -601,9 +612,9 @@ export function RequirementsForm() {
                             variant="secondary"
                             className="flex items-center gap-1.5 cursor-pointer hover:border-primary"
                           >
-                            <BadgeCheck className="h-3 w-3" />
+                            <VerifiedIcon className="h-3 w-3" fontSize="inherit" />
                             {standard.label}
-                            <Info className="h-3 w-3 text-muted-foreground" />
+                            <InfoOutlinedIcon className="h-3 w-3 text-muted-foreground" />
                           </Badge>
                         </PopoverTrigger>
                         <PopoverContent className="w-80">
@@ -636,7 +647,7 @@ export function RequirementsForm() {
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full"
                   >
-                    <Upload className="mr-2 h-4 w-4" />
+                    <CloudUploadIcon fontSize="small" className="mr-2" />
                     Choose Files
                   </Button>
                 </div>
@@ -652,7 +663,7 @@ export function RequirementsForm() {
                                 </span>
                             </div>
                             <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => handleRemoveFile(index)}>
-                               <X className="h-4 w-4"/>
+                               <CloseIcon fontSize="small" />
                                <span className="sr-only">Remove file</span>
                             </Button>
                         </div>
@@ -668,12 +679,12 @@ export function RequirementsForm() {
               <Button type="submit" disabled={loading || !files.some(isRequirementFile)}>
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <CircularProgress size={16} className="mr-2 text-primary" />
                     Generating...
                   </>
                 ) : (
                   <>
-                    <Upload className="mr-2 h-4 w-4" />
+                    <CloudUploadIcon fontSize="small" className="mr-2" />
                     Generate Test Cases
                   </>
                 )}
@@ -685,7 +696,7 @@ export function RequirementsForm() {
         {loading && (
           <Card>
               <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Analyzing Document...</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><CircularProgress size={18} className="text-primary" />Analyzing Document...</CardTitle>
                   <CardDescription>AI is parsing requirements and generating test cases. This may take a moment.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -717,7 +728,7 @@ export function RequirementsForm() {
               <CardHeader className="flex-row items-start justify-between gap-4">
                 <div>
                     <CardTitle className="flex items-center gap-2 text-primary">
-                        <ListChecks className="h-6 w-6" /> Generated Test Cases
+                        <PlaylistAddCheckIcon className="h-6 w-6" /> Generated Test Cases
                     </CardTitle>
                     <CardDescription>
                         {result.requirementTestCases.reduce((acc, curr) => acc + curr.testCases.length, 0)} test cases generated for {result.requirementTestCases.length} requirements.
@@ -738,7 +749,7 @@ export function RequirementsForm() {
                         <Button disabled={isExportingToJira}>
                           {isExportingToJira ? (
                             <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <CircularProgress size={16} className="mr-2 text-primary" />
                               Exporting...
                             </>
                           ) : (
@@ -784,7 +795,11 @@ export function RequirementsForm() {
                                           {tc.compliance && tc.compliance.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mt-2">
                                               {tc.compliance.map(standard => (
-                                                <Badge key={standard} variant="outline" className="font-normal">
+                                                <Badge
+                                                  key={standard}
+                                                  variant="success"
+                                                  className="font-normal"
+                                                >
                                                   {standard}
                                                 </Badge>
                                               ))}

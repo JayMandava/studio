@@ -33,16 +33,14 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { jsPDF } from 'jspdf';
-import {
-  Trash2,
-  FileText,
-  Clock,
-  Download,
-  ChevronDown,
-  ListChecks,
-  Send,
-  Loader2,
-} from 'lucide-react';
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import DownloadIcon from "@mui/icons-material/Download";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
+import SendIcon from "@mui/icons-material/Send";
+import CircularProgress from "@mui/material/CircularProgress";
 import { exportAllToJira, validateJiraConfig } from '@/lib/integrations/jira';
 import {
   AlertDialog,
@@ -298,7 +296,7 @@ export function NotebookView() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <DeleteOutlineIcon className="mr-2 h-4 w-4" fontSize="small" />
                   Clear History
                 </Button>
               </AlertDialogTrigger>
@@ -332,11 +330,11 @@ export function NotebookView() {
                   >
                     <div className="rounded-lg border p-4 transition-colors hover:bg-muted/50">
                       <div className="flex items-center gap-3">
-                        <FileText className="h-6 w-6 text-primary" />
+                        <DescriptionIcon className="h-6 w-6 text-primary" fontSize="inherit" />
                         <div className="flex-1">
                           <p className="font-semibold">{entry.fileName}</p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
+                            <AccessTimeIcon className="h-3 w-3" fontSize="inherit" />
                             <span>
                               Saved on{' '}
                               {new Date(entry.date).toLocaleDateString()}{' '}
@@ -359,7 +357,7 @@ export function NotebookView() {
             </ScrollArea>
           ) : (
             <div className="flex h-60 flex-col items-center justify-center rounded-lg border border-dashed">
-              <FileText className="h-12 w-12 text-muted-foreground" />
+              <DescriptionIcon className="h-12 w-12 text-muted-foreground" fontSize="inherit" />
               <p className="mt-4 text-center text-muted-foreground">
                 Your notebook is empty.
                 <br />
@@ -377,7 +375,7 @@ export function NotebookView() {
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-primary">
-              <ListChecks className="h-6 w-6" />
+              <PlaylistAddCheckIcon className="h-6 w-6" />
               {selectedEntry?.fileName}
             </DialogTitle>
           </DialogHeader>
@@ -399,14 +397,14 @@ export function NotebookView() {
                       <Button disabled={isExporting}>
                         {isExporting ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <CircularProgress size={16} className="mr-2 text-primary" />
                             Exporting...
                           </>
                         ) : (
                           <>
-                            <Download className="mr-2 h-4 w-4" />
+                            <DownloadIcon className="mr-2 h-4 w-4" fontSize="inherit" />
                             Export
-                            <ChevronDown className="ml-2 h-4 w-4" />
+                            <ExpandMoreIcon className="ml-2 h-4 w-4" fontSize="inherit" />
                           </>
                         )}
                       </Button>
@@ -425,7 +423,7 @@ export function NotebookView() {
                       {activeIntegrations.length > 0 && <DropdownMenuSeparator />}
                       {activeIntegrations.map((integration) => (
                         <DropdownMenuItem key={integration.tool} onClick={() => handleAlmExport(integration.tool)}>
-                          <Send className="mr-2 h-4 w-4" />
+                           <SendIcon className="mr-2 h-4 w-4" fontSize="inherit" />
                           Export to {integration.tool}
                         </DropdownMenuItem>
                       ))}
