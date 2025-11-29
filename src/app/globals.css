@@ -8,7 +8,7 @@
     --background: 217 70% 97%; /* soft blue surface #f4f7ff */
     --foreground: 220 7% 18%; /* #202124 adjusted slightly darker */
 
-    --card: 48 100% 97%; /* soft warm tint for cards (#fff9e6) to gently weave yellow in */
+    --card: 0 0% 100%; /* clean white cards */
     --card-foreground: 220 7% 18%;
 
     --popover: 0 0% 100%;
@@ -24,7 +24,7 @@
     --muted-foreground: 220 7% 38%;
 
     --accent: 43 96% 49%; /* Google Yellow #fbbc04 */
-    --accent-foreground: 220 7% 20%;
+    --accent-foreground: 220 7% 18%;
 
     --destructive: 3 79% 55%; /* Google Red #ea4335 */
     --destructive-foreground: 0 0% 98%;
@@ -32,7 +32,7 @@
     --border: 219 29% 90%; /* soft blue-gray border */
     --input: 219 29% 90%;
     --ring: 213 82% 52%; /* focus ring matches primary */
-    --radius: 0.75rem; /* closer to Material 3 shape scale */
+    --radius: 1rem; /* more rounded for expressive feel */
 
     /* Charts - full Google spectrum */
     --chart-1: 213 82% 52%; /* blue */
@@ -46,7 +46,7 @@
     --sidebar-foreground: 220 7% 18%;
     --sidebar-primary: 213 82% 52%; /* blue dominates */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 213 82% 62%; /* softer blue accent chips to stay cohesive */
+    --sidebar-accent: 213 82% 62%; /* subtle blue accent to stay cohesive */
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 219 29% 90%;
     --sidebar-ring: 213 82% 52%;
