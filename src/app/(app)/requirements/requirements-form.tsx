@@ -784,7 +784,11 @@ export function RequirementsForm() {
                                           {tc.compliance && tc.compliance.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mt-2">
                                               {tc.compliance.map(standard => (
-                                                <Badge key={standard} variant="outline" className="font-normal">
+                                                <Badge
+                                                  key={standard}
+                                                  variant="secondary"
+                                                  className="font-normal bg-secondary/15 text-secondary-foreground border border-secondary/30"
+                                                >
                                                   {standard}
                                                 </Badge>
                                               ))}
